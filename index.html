@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="J 계산기">
+<meta name="theme-color" content="#DCE3D9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#151413" media="(prefers-color-scheme: dark)">
+<title>J 계산기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --bg:#E8EDE6;--paper:#F4F7F2;--bar:#DCE3D9;--ink:#16212A;--muted:#56645E;--line:#CBD6CB;--line-strong:#9FB3A3;
+  --key:#FBFCFA;--key-ink:#16212A;--key-fn:#E2E9DF;--key-op:#D9E3EF;--key-eq:#1F4E9C;--key-eq-ink:#FFFFFF;--key-edge:#BFCBC0;
+  --gold:#8A6508;--blue:#1F4E9C;--err:#B3261E;
+  --plot-bg:#F6F9F4;--grid-minor:#E1E9DF;--grid-major:#C3D2C4;--axis:#46554F;
+  --c1:#1F4E9C;--c2:#B3261E;--c3:#2E7D4F;--c4:#9A6F06;--c5:#6B3FA0;--c6:#0F7C7A;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  background:var(--bar);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1C1A18;--paper:#232120;--bar:#151413;--ink:#EEE8DC;--muted:#A69D8F;--line:#36322E;--line-strong:#57514A;
+    --key:#2C2926;--key-ink:#EEE8DC;--key-fn:#35312D;--key-op:#28313D;--key-eq:#D9A92E;--key-eq-ink:#1C1A18;--key-edge:#151413;
+    --gold:#E0B23A;--blue:#7FAEEA;--err:#F2867D;
+    --plot-bg:#1F1D1B;--grid-minor:#292624;--grid-major:#3A3632;--axis:#A69D8F;
+    --c1:#7FAEEA;--c2:#F2867D;--c3:#6CC495;--c4:#E0B23A;--c5:#B794E8;--c6:#4FC7C4;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1C1A18;--paper:#232120;--bar:#151413;--ink:#EEE8DC;--muted:#A69D8F;--line:#36322E;--line-strong:#57514A;
+  --key:#2C2926;--key-ink:#EEE8DC;--key-fn:#35312D;--key-op:#28313D;--key-eq:#D9A92E;--key-eq-ink:#1C1A18;--key-edge:#151413;
+  --gold:#E0B23A;--blue:#7FAEEA;--err:#F2867D;
+  --plot-bg:#1F1D1B;--grid-minor:#292624;--grid-major:#3A3632;--axis:#A69D8F;
+  --c1:#7FAEEA;--c2:#F2867D;--c3:#6CC495;--c4:#E0B23A;--c5:#B794E8;--c6:#4FC7C4;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;height:100%;display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:none;
+  padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);
+  background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;
+  -webkit-text-size-adjust:100%;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 16px;background:var(--bar);border-bottom:1px solid var(--line)}
+.top h1{margin:0;font-size:17px;font-weight:600;letter-spacing:-0.01em}
+.top-actions{display:flex;gap:6px;align-items:center}
+.angle{font-family:var(--mono);font-size:13px;font-weight:500;padding:5px 12px;border-radius:999px;border:1px solid var(--line-strong);background:transparent}
+
+main{flex:1;min-height:0;position:relative}
+.tab{position:absolute;inset:0;display:none;flex-direction:column}
+.tab.active{display:flex}
+
+/* calculator */
+.history{flex:1;min-height:0;overflow-y:auto;padding:8px 16px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.empty{color:var(--muted);max-width:34em;margin:12px 0;font-size:14px}
+.h-item{padding:10px 0;border-bottom:1px solid var(--line)}
+.h-expr{display:block;width:100%;text-align:left;background:none;border:0;padding:0;font-family:var(--mono);font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.h-res{display:block;width:100%;text-align:right;background:none;border:0;padding:2px 0 0;font-family:var(--mono);font-size:22px;font-weight:500;overflow-wrap:anywhere}
+.h-sub{text-align:right;font-family:var(--mono);font-size:13px;color:var(--gold)}
+.h-err{text-align:right;font-size:14px;color:var(--err)}
+.entry{padding:6px 16px 2px;background:var(--paper);border-top:1px solid var(--line)}
+#expr{width:100%;font-family:var(--mono);font-size:22px;border:0;background:transparent;color:var(--ink);outline:none;padding:6px 0;caret-color:var(--blue)}
+#expr::placeholder{color:var(--muted);opacity:.7}
+.preview{font-family:var(--mono);font-size:14px;color:var(--muted);min-height:21px;text-align:right;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:6px 12px;background:var(--paper);scrollbar-width:none;flex:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font-family:var(--mono);font-size:14px;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:var(--key);color:var(--ink);white-space:nowrap}
+.chip.util{font-family:var(--sans);border-color:var(--line-strong)}
+.chip.warn{color:var(--err);border-color:var(--err)}
+.btn.warn{color:var(--err);border-color:var(--err)}
+#clearHist{margin-top:14px}
+:root{--vh:100vh}
+@supports (height:100dvh){:root{--vh:100dvh}}
+.keypad{--kh:clamp(30px,calc((var(--vh) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 310px) / 11),44px);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:var(--kh);gap:4px;padding:4px 8px 8px;background:var(--paper);flex:none}
+.key{min-width:0;padding:0;border:0;border-radius:8px;font-size:19px;line-height:1;white-space:nowrap;background:var(--key);color:var(--key-ink);box-shadow:inset 0 -2px 0 var(--key-edge);user-select:none;-webkit-user-select:none}
+.key.fn{background:var(--key-fn);font-family:var(--mono);font-size:14.5px}
+.key.an{background:color-mix(in srgb,var(--key-op) 60%,var(--key-fn));font-family:var(--sans);font-size:14px;font-weight:500}
+.key.tall{grid-row:span 2}
+.key.op{background:var(--key-op);color:var(--blue);font-size:20px}
+.key.eq{background:var(--key-eq);color:var(--key-eq-ink);font-weight:600;font-size:22px;box-shadow:none}
+.key:active{transform:translateY(1px);box-shadow:none}
+
+/* graph */
+.flist{max-height:32vh;overflow-y:auto;background:var(--paper);flex:none}
+.flist.collapsed{display:none}
+.frow{display:flex;align-items:center;gap:10px;padding:2px 8px 2px 14px;border-bottom:1px solid var(--line)}
+.swatch{width:22px;height:22px;flex:none;border-radius:50%;border:2.5px solid var(--c);background:var(--c);padding:0}
+.swatch[aria-pressed="false"]{background:transparent}
+.fexpr{flex:1;min-width:0;font-family:var(--mono);font-size:16px;border:0;background:transparent;color:var(--ink);padding:10px 0;outline:none}
+.fdel{flex:none;width:36px;height:36px;border:0;background:none;color:var(--muted);font-size:20px;border-radius:8px}
+.ferr{font-size:12px;color:var(--err);padding:0 14px 6px 46px;border-bottom:1px solid var(--line)}
+.fbar{display:flex;gap:8px;padding:6px 12px;background:var(--paper);border-bottom:1px solid var(--line);flex:none}
+.btn{font-size:14px;padding:6px 12px;border-radius:8px;border:1px solid var(--line-strong);background:var(--key);color:var(--ink)}
+.sliders{background:var(--paper);flex:none}
+.srow{display:flex;align-items:center;gap:10px;padding:4px 12px;border-bottom:1px solid var(--line)}
+.slab{font-family:var(--mono);font-size:16px;width:14px}
+.srow input[type=range]{flex:1;min-width:0;accent-color:var(--blue)}
+.sval{font-family:var(--mono);font-size:14px;width:56px;text-align:right}
+.splay{font-size:13px;padding:4px 10px;border-radius:8px;border:1px solid var(--line-strong);background:var(--key)}
+.plotwrap{flex:1;min-height:0;position:relative}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.readout{position:absolute;left:10px;top:10px;max-width:calc(100% - 20px);background:var(--paper);background:color-mix(in srgb,var(--paper) 92%,transparent);border:1px solid var(--line-strong);border-radius:10px;padding:6px 10px;font-family:var(--mono);font-size:13px;line-height:1.5}
+.readout[hidden]{display:none}
+.ro-line{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.ro-sw{width:9px;height:9px;border-radius:50%;flex:none}
+.ro-x{margin-top:4px;font-family:var(--sans);font-size:12px;padding:2px 8px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--muted)}
+.plotbtns{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:6px}
+.plotbtns button{width:44px;height:40px;border-radius:10px;border:1px solid var(--line-strong);background:var(--paper);font-size:18px}
+.plotbtns .small{font-size:12px}
+.hint{position:absolute;left:10px;bottom:10px;right:64px;font-size:12.5px;color:var(--muted);pointer-events:none}
+
+/* bode */
+.bode-in{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--paper);border-bottom:1px solid var(--line);flex:none}
+.bode-in label{font-family:var(--mono);font-size:16px;flex:none}
+#gexpr{flex:1;min-width:0;font-family:var(--mono);font-size:16px;border:0;background:transparent;color:var(--ink);padding:10px 0;outline:none}
+.margins{padding:6px 14px;font-size:13.5px;background:var(--paper);border-bottom:1px solid var(--line);flex:none}
+.margins .m-err{color:var(--err)}
+.margins .m-val{font-family:var(--mono);color:var(--ink)}
+.margins div{color:var(--muted)}
+
+/* tabbar */
+.tabbar{display:grid;grid-template-columns:repeat(3,1fr);background:var(--bar);border-top:1px solid var(--line);flex:none}
+.tabbar button{border:0;background:none;padding:11px 0 9px;font-size:14px;color:var(--muted);position:relative}
+.tabbar button[aria-selected="true"]{color:var(--ink);font-weight:600}
+.tabbar button[aria-selected="true"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:2px;background:var(--blue);border-radius:0 0 2px 2px}
+
+/* examples sheet */
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.38);display:none;align-items:flex-end;z-index:20}
+.sheet.open{display:flex}
+.sheet-panel{width:100%;max-height:78%;overflow-y:auto;background:var(--paper);border-radius:16px 16px 0 0;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.sheet-head h2{margin:0;font-size:16px;font-weight:600}
+.ex{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 0}
+.ex code{display:block;font-family:var(--mono);font-size:14.5px;color:var(--ink);overflow-wrap:anywhere}
+.ex span{font-size:13px;color:var(--muted)}
+@media (max-height:520px){#tab-calc{overflow-y:auto}.history{flex:none;height:90px}}
+@media (prefers-reduced-motion: reduce){.key:active{transform:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>J 계산기</h1>
+  <div class="top-actions">
+    <button id="exBtn" class="angle" type="button">예시</button>
+    <button id="kbdBtn" class="angle" type="button" aria-pressed="false" aria-label="기기 키보드 켜기">⌨</button>
+    <button id="angleBtn" class="angle" type="button" aria-label="각도 단위 전환">RAD</button>
+  </div>
+</header>
+
+<main>
+  <section id="tab-calc" class="tab" aria-label="계산">
+    <div id="history" class="history" aria-live="polite"></div>
+    <div class="entry">
+      <input id="expr" type="text" inputmode="none" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="수식 입력" aria-label="수식">
+      <div id="preview" class="preview"></div>
+    </div>
+    
+    <div id="keypad" class="keypad"></div>
+  </section>
+
+  <section id="tab-graph" class="tab" aria-label="그래프">
+    <div id="flist" class="flist"></div>
+    <div class="fbar">
+      <button id="addF" class="btn" type="button">함수 추가</button>
+      <button id="toggleList" class="btn" type="button">목록 접기</button>
+    </div>
+    <div id="sliders" class="sliders"></div>
+    <div id="plotwrap" class="plotwrap">
+      <canvas id="plot" aria-label="함수 그래프"></canvas>
+      <div id="readout" class="readout" hidden></div>
+      <p id="hint" class="hint">드래그로 이동하고 두 손가락으로 확대해요. 그래프를 탭하면 값이, 점을 탭하면 근, 극값, 교점 좌표가 나와요.</p>
+      <div class="plotbtns">
+        <button id="zin" type="button" aria-label="확대">+</button>
+        <button id="zout" type="button" aria-label="축소">−</button>
+        <button id="zreset" class="small" type="button">원점</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-bode" class="tab" aria-label="보드 선도">
+    <div class="bode-in">
+      <label for="gexpr">G(s) =</label>
+      <input id="gexpr" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="10/(s*(s+1)*(s+5))">
+    </div>
+    <div id="bodePresets" class="chips"></div>
+    <div id="margins" class="margins"></div>
+    <div id="bodewrap" class="plotwrap">
+      <canvas id="bode" aria-label="보드 선도"></canvas>
+      <div id="bodeReadout" class="readout" hidden></div>
+    </div>
+  </section>
+</main>
+
+<nav class="tabbar" role="tablist">
+  <button type="button" role="tab" data-tab="calc">계산</button>
+  <button type="button" role="tab" data-tab="graph">그래프</button>
+  <button type="button" role="tab" data-tab="bode">보드 선도</button>
+</nav>
+
+<div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="예시">
+  <div class="sheet-panel">
+    <div class="sheet-head"><h2>예시</h2><button id="sheetClose" class="btn" type="button">닫기</button></div>
+    <div id="exList"></div>
+    <button id="clearHist" class="btn" type="button">기록 모두 지우기</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjs@13.2.0/lib/browser/math.js"></script>
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const store = {
+  get(k, d){ try { const v = localStorage.getItem('jcalc:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v){ try { localStorage.setItem('jcalc:' + k, JSON.stringify(v)); } catch (e) {} }
+};
+const histEl = $('#history');
+if (!window.math) { histEl.textContent = '수학 엔진을 불러오지 못했어요. 인터넷 연결을 확인한 뒤 새로고침하세요.'; return; }
+
+const M = math.create(math.all);
+const MONO = '"IBM Plex Mono", ui-monospace, Menlo, monospace';
+let scope = {};
+let angleMode = store.get('angle', 'rad');
+
+/* ---------- angle mode ---------- */
+const orig = {};
+['sin','cos','tan','sec','csc','cot','asin','acos','atan','asec','acsc','acot','atan2'].forEach(n => orig[n] = M[n]);
+const toRad = x => (angleMode === 'deg' && typeof x === 'number') ? x * Math.PI / 180 : x;
+const fromRad = y => (angleMode === 'deg' && typeof y === 'number') ? y * 180 / Math.PI : y;
+const ov = {};
+['sin','cos','tan','sec','csc','cot'].forEach(n => ov[n] = x => orig[n](toRad(x)));
+['asin','acos','atan','asec','acsc','acot'].forEach(n => ov[n] = x => fromRad(orig[n](x)));
+ov.atan2 = (y, x) => fromRad(orig.atan2(y, x));
+
+/* ---------- numeric helpers ---------- */
+function num(v){
+  if (typeof v === 'number') return v;
+  if (v == null) return NaN;
+  if (typeof v === 'boolean') return v ? 1 : 0;
+  if (v.isComplex) return Math.abs(v.im) <= 1e-12 * Math.max(1, Math.abs(v.re)) ? v.re : NaN;
+  if (v.isBigNumber || v.isFraction) return Number(v.valueOf());
+  if (v.isResultSet) return num(v.entries[v.entries.length - 1]);
+  return NaN;
+}
+function normalize(s){
+  return String(s)
+    .replace(/[“”]/g, '"').replace(/[‘’]/g, "'")
+    .replace(/×/g, '*').replace(/÷/g, '/').replace(/[−–]/g, '-')
+    .replace(/π/g, 'pi').replace(/√/g, 'sqrt')
+    .replace(/(\d+(?:\.\d+)?(?:e[+-]?\d+)?)\s*∠\s*([+-]?\d+(?:\.\d+)?)/g, 'phasor($1, $2)');
+}
+function toFn(f){
+  if (typeof f === 'function') return x => num(f(x));
+  let code;
+  if (f && f.isNode) code = f.compile();
+  else if (typeof f === 'string') code = M.compile(normalize(f));
+  else throw new Error('함수 이름이나 따옴표로 감싼 식을 넣어 주세요');
+  const sc = Object.assign({}, scope);
+  return x => { sc.x = x; return num(code.evaluate(sc)); };
+}
+const GX = [0, -0.5384693101056831, 0.5384693101056831, -0.906179845938664, 0.906179845938664];
+const GW = [0.5688888888888889, 0.4786286704993665, 0.4786286704993665, 0.2369268850561891, 0.2369268850561891];
+function gl5(g, a, b){ const m = (a + b) / 2, h = (b - a) / 2; let s = 0; for (let i = 0; i < 5; i++) s += GW[i] * g(m + h * GX[i]); return s * h; }
+function integrate(f, a, b){
+  const fn = toFn(f);
+  let A = num(a), Bv = num(b);
+  if (isNaN(A) || isNaN(Bv)) throw new Error('적분 구간은 숫자로 넣어 주세요');
+  if (A === Bv) return 0;
+  let sign = 1; if (A > Bv) { const t = A; A = Bv; Bv = t; sign = -1; }
+  let g = fn, ta = A, tb = Bv;
+  if (!isFinite(A) || !isFinite(Bv)) {
+    const inv = c => c === Infinity ? 1 : c === -Infinity ? -1 : c === 0 ? 0 : (-1 + Math.sqrt(1 + 4 * c * c)) / (2 * c);
+    ta = inv(A); tb = inv(Bv);
+    g = t => { const d = 1 - t * t; const y = fn(t / d) * (1 + t * t) / (d * d); return isFinite(y) ? y : 0; };
+  }
+  let evals = 0;
+  const gg = x => { if (++evals > 400000) throw new Error('적분이 수렴하지 않아요'); return g(x); };
+  const rec = (a0, b0, whole, depth) => {
+    const m = (a0 + b0) / 2, l = gl5(gg, a0, m), r = gl5(gg, m, b0), s = l + r;
+    if (depth >= 48 || Math.abs(s - whole) <= 1e-11 * Math.max(1, Math.abs(s))) return s;
+    return rec(a0, m, l, depth + 1) + rec(m, b0, r, depth + 1);
+  };
+  const P = 16, h = (tb - ta) / P; let tot = 0;
+  for (let i = 0; i < P; i++) { const a0 = ta + i * h, b0 = a0 + h; tot += rec(a0, b0, gl5(gg, a0, b0), 0); }
+  if (!isFinite(tot)) throw new Error('적분이 수렴하지 않아요');
+  return sign * tot;
+}
+function bisect(h, a, b){
+  let fa = h(a);
+  for (let k = 0; k < 80; k++) {
+    const m = (a + b) / 2, fm = h(m);
+    if (!isFinite(fm)) return NaN;
+    if (fm === 0) return m;
+    if ((fa < 0) === (fm < 0)) { a = m; fa = fm; } else b = m;
+  }
+  return (a + b) / 2;
+}
+function nsolve(f, x0, x1){
+  const g = toFn(f);
+  if (x1 !== undefined) {
+    const lo = num(x0), hi = num(x1);
+    if ((g(lo) < 0) === (g(hi) < 0)) throw new Error('구간 양 끝에서 부호가 같아요. 근을 감싸는 구간을 넣어 주세요');
+    return bisect(g, lo, hi);
+  }
+  const a = isFinite(num(x0)) ? num(x0) : 0;
+  let x = a;
+  for (let i = 0; i < 100; i++) {
+    const fx = g(x); if (!isFinite(fx)) break;
+    if (Math.abs(fx) < 1e-15) return x;
+    const h = 1e-7 * Math.max(1, Math.abs(x));
+    const d = (g(x + h) - g(x - h)) / (2 * h);
+    if (!isFinite(d) || d === 0) break;
+    let step = fx / d, xn = x - step, k = 0;
+    while (k < 30 && !(Math.abs(g(xn)) <= Math.abs(fx))) { step /= 2; xn = x - step; k++; }
+    if (Math.abs(xn - x) <= 1e-15 * Math.max(1, Math.abs(x))) return xn;
+    x = xn;
+  }
+  if (Math.abs(g(x)) < 1e-9) return x;
+  let prevR = a, prevL = a, fR = g(a), fL = fR;
+  for (let r = 0.05; r < 1e7; r *= 1.3) {
+    const R = a + r, L = a - r, gR = g(R), gL = g(L);
+    if (isFinite(gR) && isFinite(fR) && (gR < 0) !== (fR < 0)) return bisect(g, prevR, R);
+    if (isFinite(gL) && isFinite(fL) && (gL < 0) !== (fL < 0)) return bisect(g, L, prevL);
+    prevR = R; fR = gR; prevL = L; fL = gL;
+  }
+  throw new Error('근을 찾지 못했어요. 시작값을 바꾸거나 nsolve(f, a, b)로 구간을 지정해 보세요');
+}
+function nderiv(f, x0){
+  const fn = toFn(f), x = num(x0), h = 1e-3 * Math.max(1, Math.abs(x));
+  const D = k => (fn(x + k) - fn(x - k)) / (2 * k);
+  return (4 * D(h / 2) - D(h)) / 3;
+}
+Object.assign(ov, {
+  integrate, nsolve, nderiv,
+  phasor: (r, deg) => M.complex({ r: num(r), phi: num(deg) * Math.PI / 180 }),
+  par: (...xs) => {
+    if (!xs.length) throw new Error('값을 하나 이상 넣어 주세요');
+    let s = null;
+    for (const v of xs) { const r = M.divide(1, v); s = s === null ? r : M.add(s, r); }
+    return M.divide(1, s);
+  },
+  db: x => 20 * Math.log10(num(M.abs(x)))
+});
+M.import(ov, { override: true });
+
+/* ---------- formatting ---------- */
+const FMT = { precision: 12, lowerExp: -9, upperExp: 12 };
+const pretty = s => String(s).replace(/-/g, '−');
+function frac(x, maxD){
+  let h1 = 1, h0 = 0, k1 = 0, k0 = 1, b = x;
+  for (let i = 0; i < 32; i++) {
+    const a = Math.floor(b), h2 = a * h1 + h0, k2 = a * k1 + k0;
+    if (k2 > maxD) break;
+    h0 = h1; h1 = h2; k0 = k1; k1 = k2;
+    if (Math.abs(x - h1 / k1) < 1e-12 * Math.max(1, Math.abs(x))) return { n: h1, d: k1 };
+    const r = b - a; if (r < 1e-15) break; b = 1 / r;
+  }
+  return null;
+}
+function numHint(v){
+  if (!isFinite(v) || Number.isInteger(v) || Math.abs(v) > 1e9 || Math.abs(v) < 1e-9) return '';
+  const f = frac(v, 1000); if (f && f.d > 1) return `= ${f.n}/${f.d}`;
+  const p = frac(v / Math.PI, 24);
+  if (p && p.n !== 0) { const t = p.n === 1 ? 'π' : p.n === -1 ? '-π' : `${p.n}π`; return `= ${p.d === 1 ? t : t + '/' + p.d}`; }
+  const q = frac(v * v, 1);
+  if (q && q.n > 1 && q.n < 10000) return `= ${v < 0 ? '-' : ''}√${q.n}`;
+  return '';
+}
+function describe(node, val){
+  let n = node;
+  if (n.isBlockNode) n = n.blocks[n.blocks.length - 1].node;
+  const v = (val && val.isResultSet) ? val.entries[val.entries.length - 1] : val;
+  if (n.isFunctionAssignmentNode) return { main: `${n.name}(${n.params.join(', ')}) 정의됨`, sub: '', raw: null };
+  if (typeof v === 'function') return { main: '함수', sub: '', raw: null };
+  if (v === undefined) return { main: '완료', sub: '', raw: null };
+  let main, sub = '', raw;
+  if (v && v.isNode) { raw = v.toString(); main = raw; sub = '기호 결과'; }
+  else if (typeof v === 'string') { raw = JSON.stringify(v); main = v; }
+  else if (typeof v === 'boolean') { raw = String(v); main = v ? '참' : '거짓'; }
+  else {
+    raw = M.format(v, FMT); main = raw;
+    if (v && v.isComplex) {
+      const r = Math.hypot(v.re, v.im), th = Math.atan2(v.im, v.re) * 180 / Math.PI;
+      sub = `${M.format(r, { precision: 6 })} ∠ ${M.format(th, { precision: 6 })}°`;
+    } else if (typeof v === 'number') sub = numHint(v);
+  }
+  if (n.isAssignmentNode) main = `${n.object.toString()} = ${main}`;
+  return { main: pretty(main), sub: pretty(sub), raw };
+}
+function cleanErr(e){
+  const m = String(e && e.message || e);
+  return m.replace(/Undefined symbol (\w+)/, '정의되지 않은 기호: $1')
+    .replace(/Unexpected end of expression.*/, '식이 끝나지 않았어요')
+    .replace(/Parenthesis \) expected.*/, '닫는 괄호가 필요해요')
+    .replace(/Value expected.*/, '값이 빠졌어요')
+    .replace(/Unexpected operator.*/, '연산자 위치를 확인하세요');
+}
+function fmtN(v, p = 4){
+  if (!isFinite(v)) return '—';
+  const a = Math.abs(v);
+  const s = (a !== 0 && (a < 1e-3 || a >= 1e6)) ? v.toExponential(p - 1) : String(parseFloat(v.toPrecision(p + 1)));
+  return pretty(s);
+}
+function run(src, sc){ const node = M.parse(normalize(src)); return { node, val: node.compile().evaluate(sc) }; }
+
+/* ---------- calculator ---------- */
+const inp = $('#expr'), previewEl = $('#preview');
+let hist = store.get('hist', []);
+let caret = 0;
+let graphStale = true, bodeStale = true;
+hist.forEach(it => { if (it.err) return; try { const r = run(it.e, scope); const v = (r.val && r.val.isResultSet) ? r.val.entries[r.val.entries.length - 1] : r.val; if (v !== undefined && typeof v !== 'function') scope.ans = v; } catch (e) {} });
+
+function renderHist(){
+  histEl.textContent = '';
+  if (!hist.length) {
+    histEl.appendChild(el('p', 'empty', '수식을 입력하고 = 를 누르면 결과가 여기에 쌓여요. 위쪽 예시 버튼에서 복소수, 페이저, 단위 변환, 행렬, 기호 미분, 적분을 바로 실행해 볼 수 있어요.'));
+    return;
+  }
+  for (const it of hist) {
+    const d = el('div', 'h-item');
+    const be = el('button', 'h-expr', it.e); be.type = 'button';
+    be.addEventListener('click', () => { inp.value = it.e; caret = it.e.length; updatePreview(); });
+    d.appendChild(be);
+    if (it.err) d.appendChild(el('div', 'h-err', it.err));
+    else {
+      const br = el('button', 'h-res', it.main); br.type = 'button';
+      if (it.raw != null) br.addEventListener('click', () => insert(it.raw));
+      d.appendChild(br);
+      if (it.sub) d.appendChild(el('div', 'h-sub', it.sub));
+    }
+    histEl.appendChild(d);
+  }
+  histEl.scrollTop = histEl.scrollHeight;
+}
+function commit(){
+  const src = inp.value.trim(); if (!src) return;
+  let item;
+  try {
+    const { node, val } = run(src, scope);
+    const f = describe(node, val);
+    item = { e: src, main: f.main, sub: f.sub, raw: f.raw };
+    const v = (val && val.isResultSet) ? val.entries[val.entries.length - 1] : val;
+    if (v !== undefined && typeof v !== 'function') scope.ans = v;
+  } catch (err) { item = { e: src, err: cleanErr(err) }; }
+  hist.push(item); if (hist.length > 80) hist.shift();
+  store.set('hist', hist);
+  inp.value = ''; caret = 0; previewEl.textContent = '';
+  graphStale = bodeStale = true;
+  renderHist();
+}
+let pvTimer = 0;
+function updatePreview(){
+  clearTimeout(pvTimer);
+  pvTimer = setTimeout(() => {
+    const src = inp.value.trim();
+    if (!src) { previewEl.textContent = ''; return; }
+    try { const { node, val } = run(src, Object.assign({}, scope)); const f = describe(node, val); previewEl.textContent = (f.raw == null) ? '' : '= ' + f.main + (f.sub && f.sub !== '기호 결과' ? '   ' + f.sub : ''); }
+    catch (e) { previewEl.textContent = ''; }
+  }, 90);
+}
+function syncCaret(){ caret = inp.selectionStart != null ? inp.selectionStart : inp.value.length; }
+['input','click','keyup','select','blur'].forEach(ev => inp.addEventListener(ev, syncCaret));
+inp.addEventListener('input', updatePreview);
+inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); commit(); } });
+
+function insert(text){
+  const v = inp.value; let s = Math.min(caret, v.length), e = s;
+  if (document.activeElement === inp) { s = inp.selectionStart; e = inp.selectionEnd; }
+  if (text === ')' && v[s] === ')' && s === e) { caret = s + 1; }
+  else {
+    const mark = text.indexOf('|'), t = text.replace('|', '');
+    inp.value = v.slice(0, s) + t + v.slice(e);
+    caret = s + (mark >= 0 ? mark : t.length);
+  }
+  try { inp.setSelectionRange(caret, caret); } catch (err) {}
+  updatePreview();
+}
+function backspace(){
+  const v = inp.value; let s = Math.min(caret, v.length), e = s;
+  if (document.activeElement === inp) { s = inp.selectionStart; e = inp.selectionEnd; }
+  if (s === e && s > 0) s -= 1;
+  inp.value = v.slice(0, s) + v.slice(e); caret = s;
+  try { inp.setSelectionRange(caret, caret); } catch (err) {}
+  updatePreview();
+}
+const FN_ROWS = [
+  [['sin','sin(|)'],['cos','cos(|)'],['tan','tan(|)'],['sin⁻¹','asin(|)'],['cos⁻¹','acos(|)'],['tan⁻¹','atan(|)']],
+  [['sinh','sinh(|)'],['cosh','cosh(|)'],['tanh','tanh(|)'],['ln','log(|)'],['log','log10(|)'],['eˣ','exp(|)']],
+  [['x²','^2'],['x³','^3'],['xʸ','^'],['√','sqrt(|)'],['³√','cbrt(|)'],['1/x','1/(|)']],
+  [['abs','abs(|)'],['n!','!'],['nCr','combinations(|, )'],['nPr','permutations(|, )'],['mod',' mod '],['rand','random()']],
+  [['d/dx','derivative("|", "x")','an'],['∫','integrate("|", 0, 1)','an'],['근찾기','nsolve("|", 1)','an'],['정리','simplify("|")','an'],['det','det(|)','an'],['inv','inv(|)','an']],
+  [['π','pi'],['e','e'],['i','i'],['x','x'],[';','; '],['[ ]','[|]']],
+  [['∠','∠','an'],['par','par(|)','an'],['dB','db(|)','an'],['to',' to ','an'],['°',' deg','an'],[',',', ']]
+];
+const NUM_KEYS = [
+  ['7','7',''],['8','8',''],['9','9',''],['÷','/','op'],['⌫','#back','op'],['AC','#clear','op'],
+  ['4','4',''],['5','5',''],['6','6',''],['×','*','op'],['(','(','fn'],[')',')','fn'],
+  ['1','1',''],['2','2',''],['3','3',''],['−','-','op'],['ans','ans','fn'],['=','#eval','eq tall'],
+  ['0','0',''],['.','.',''],['×10ˣ','*10^','fn'],['+','+','op'],['≔',' = ','fn']
+];
+const KEY_LABEL = { '⌫':'한 글자 지우기','AC':'입력 전체 지우기','÷':'나누기','×':'곱하기','−':'빼기','+':'더하기','=':'계산','≔':'대입 기호 =',
+  'xʸ':'거듭제곱','√':'제곱근','³√':'세제곱근','1/x':'역수','eˣ':'e의 거듭제곱','×10ˣ':'10의 거듭제곱 곱하기','sin⁻¹':'아크사인','cos⁻¹':'아크코사인','tan⁻¹':'아크탄젠트',
+  'x²':'제곱','x³':'세제곱','d/dx':'기호 미분','∫':'정적분','°':'도 단위','∠':'페이저 각도','[ ]':'대괄호' };
+const kp = $('#keypad');
+function addKey(label, ins, cls){
+  const b = el('button', 'key ' + (cls == null ? 'fn' : cls), label); b.type = 'button';
+  if (KEY_LABEL[label]) b.setAttribute('aria-label', KEY_LABEL[label]);
+  b.addEventListener('click', () => {
+    if (ins === '#back') return backspace();
+    if (ins === '#clear') { inp.value = ''; caret = 0; previewEl.textContent = ''; return; }
+    if (ins === '#eval') return commit();
+    if (inp.value === '' && /^[\/*+^]/.test(ins) && scope.ans !== undefined) return insert('ans' + ins);
+    insert(ins);
+  });
+  kp.appendChild(b);
+}
+FN_ROWS.forEach(row => row.forEach(([l, i, c]) => addKey(l, i, c)));
+NUM_KEYS.forEach(([l, i, c]) => addKey(l, i, c));
+
+$('#exBtn').addEventListener('click', openSheet);
+const kbdBtn = $('#kbdBtn');
+kbdBtn.addEventListener('click', () => {
+  const on = inp.inputMode !== 'text';
+  inp.inputMode = on ? 'text' : 'none';
+  kbdBtn.setAttribute('aria-pressed', String(on));
+  kbdBtn.setAttribute('aria-label', on ? '기기 키보드 끄기' : '기기 키보드 켜기');
+  if (on) inp.focus(); else inp.blur();
+});
+let clearArm = 0;
+const clearBtn = $('#clearHist');
+clearBtn.addEventListener('click', () => {
+  if (Date.now() - clearArm < 3000) {
+    hist = []; store.set('hist', hist); renderHist(); clearArm = 0;
+    clearBtn.textContent = '기록 모두 지우기'; clearBtn.classList.remove('warn'); closeSheet();
+  } else {
+    clearArm = Date.now(); clearBtn.textContent = '한 번 더 누르면 모두 삭제'; clearBtn.classList.add('warn');
+    setTimeout(() => { clearBtn.textContent = '기록 모두 지우기'; clearBtn.classList.remove('warn'); }, 3000);
+  }
+});
+const EXAMPLES = [
+  ['(2+3i)*(1-i)', '복소수 곱셈'],
+  ['230∠-120 + 230∠120', '페이저 합, 각도는 도 단위'],
+  ['par(10 kohm, 4.7 kohm)', '병렬 저항'],
+  ['5 cm to inch', '단위 변환'],
+  ['det([1,2;3,4])', '행렬식'],
+  ['inv([2,1;1,3])', '역행렬'],
+  ['derivative("x^3 + sin(x)", "x")', '기호 미분'],
+  ['simplify("2x + 3x - x^2/x")', '식 정리'],
+  ['integrate("exp(-x^2)", -Infinity, Infinity)', '무한 구간 정적분'],
+  ['nsolve("cos(x) - x", 1)', '방정식의 수치해'],
+  ['f(x) = x^3 - 2x - 5; nsolve(f, 2)', '함수를 정의하고 근 찾기. 정의한 f는 그래프 탭에서도 쓸 수 있어요'],
+  ['db(1/sqrt(2))', '데시벨 변환']
+];
+const sheet = $('#sheet'), exList = $('#exList');
+EXAMPLES.forEach(([ex, desc]) => {
+  const b = el('button', 'ex'); b.type = 'button';
+  b.appendChild(el('code', null, ex)); b.appendChild(el('span', null, desc));
+  b.addEventListener('click', () => { closeSheet(); inp.value = ex; caret = ex.length; commit(); });
+  exList.appendChild(b);
+});
+function openSheet(){ sheet.classList.add('open'); $('#sheetClose').focus(); }
+function closeSheet(){ sheet.classList.remove('open'); }
+$('#sheetClose').addEventListener('click', closeSheet);
+sheet.addEventListener('click', e => { if (e.target === sheet) closeSheet(); });
+
+const angleBtn = $('#angleBtn');
+function syncAngle(){ angleBtn.textContent = angleMode === 'deg' ? 'DEG' : 'RAD'; angleBtn.setAttribute('aria-label', angleMode === 'deg' ? '각도 단위: 도. 눌러서 라디안으로 전환' : '각도 단위: 라디안. 눌러서 도로 전환'); }
+angleBtn.addEventListener('click', () => { angleMode = angleMode === 'deg' ? 'rad' : 'deg'; store.set('angle', angleMode); syncAngle(); updatePreview(); reqGraph(); });
+
+/* ---------- shared canvas helpers ---------- */
+let C = {};
+function readColors(){
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+  C = { plotBg: g('--plot-bg'), minor: g('--grid-minor'), major: g('--grid-major'), axis: g('--axis'), muted: g('--muted'), ink: g('--ink'), err: g('--err'), blue: g('--blue'), series: [1,2,3,4,5,6].map(i => g('--c' + i)) };
+}
+function prep(cv){
+  const r = cv.getBoundingClientRect(), W = r.width, H = r.height;
+  if (!W || !H) return {};
+  const dpr = Math.min(window.devicePixelRatio || 1, 3), w = Math.round(W * dpr), h = Math.round(H * dpr);
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, W, H };
+}
+function gestures(cv, h){
+  const P = new Map(); let mode = null, st = null, moved = false;
+  const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const begin = () => {
+    const pts = [...P.values()];
+    if (pts.length === 1) { mode = 'pan'; st = { p: pts[0], s: h.snap() }; }
+    else if (pts.length >= 2) { const [a, b] = pts; mode = 'pinch'; moved = true; st = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, m: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, s: h.snap() }; }
+  };
+  cv.addEventListener('pointerdown', e => { try { cv.setPointerCapture(e.pointerId); } catch (err) {} P.set(e.pointerId, pos(e)); if (P.size === 1) moved = false; h.down && h.down(); begin(); });
+  cv.addEventListener('pointermove', e => {
+    if (!P.has(e.pointerId)) return;
+    P.set(e.pointerId, pos(e));
+    const pts = [...P.values()];
+    if (mode === 'pan') { const dx = pts[0].x - st.p.x, dy = pts[0].y - st.p.y; if (!moved && Math.hypot(dx, dy) > 6) moved = true; if (moved) h.pan(dx, dy, st.s); }
+    else if (mode === 'pinch' && pts.length >= 2) { const [a, b] = pts; h.pinch((Math.hypot(a.x - b.x, a.y - b.y) || 1) / st.d, { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, st); }
+  });
+  const end = (e, cancel) => {
+    if (!P.has(e.pointerId)) return;
+    const p = P.get(e.pointerId); P.delete(e.pointerId);
+    if (P.size === 0) { if (!cancel && mode === 'pan' && !moved) h.tap(p.x, p.y); mode = null; h.up && h.up(); }
+    else begin();
+  };
+  cv.addEventListener('pointerup', e => end(e, false));
+  cv.addEventListener('pointercancel', e => end(e, true));
+  cv.addEventListener('wheel', e => { e.preventDefault(); h.wheel(Math.exp(-e.deltaY * 0.0015), pos(e)); }, { passive: false });
+}
+function setReadout(box, lines, onClose){
+  box.textContent = '';
+  if (!lines) { box.hidden = true; return; }
+  box.hidden = false;
+  for (const l of lines) {
+    const d = el('div', 'ro-line');
+    if (l.color) { const sw = el('span', 'ro-sw'); sw.style.background = l.color; d.appendChild(sw); }
+    d.appendChild(document.createTextNode(l.text));
+    box.appendChild(d);
+  }
+  const x = el('button', 'ro-x', '닫기'); x.type = 'button'; x.addEventListener('click', onClose); box.appendChild(x);
+}
+const niceStep = raw => { const p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p; };
+function fmtAxis(v, step){
+  if (Math.abs(v) < step * 1e-6) return '0';
+  if (Math.abs(v) >= 1e6 || step < 1e-4) return pretty(v.toExponential(1));
+  return pretty(v.toFixed(Math.max(0, -Math.floor(Math.log10(step) + 1e-9))));
+}
+
+/* ---------- graph ---------- */
+let funcs = store.get('funcs', [{ e: 'sin(a*x)', on: true }, { e: 'x^2/4 - 1', on: true }]);
+const Pm = Object.assign({ a: 1, b: 1, c: 0 }, store.get('params', {}));
+const G = Object.assign({ cx: 0, cy: 0, scale: 40 }, store.get('gview', {}), { trace: null, sel: null, markers: [] });
+const plotCv = $('#plot'), readout = $('#readout'), flist = $('#flist'), slidersEl = $('#sliders'), hint = $('#hint');
+if (store.get('hintSeen', false)) hint.hidden = true;
+const saveFuncs = () => store.set('funcs', funcs.map(f => ({ e: f.e, on: f.on })));
+const cleanF = s => normalize(s).replace(/^\s*y\s*=/, '').replace(/^\s*[a-zA-Z]\w*\s*\(\s*x\s*\)\s*=/, '');
+function compileAll(){
+  const base = Object.assign({}, scope);
+  funcs.forEach(f => {
+    f._fn = null; f._err = ''; f._uses = [];
+    const src = cleanF(f.e); if (!src.trim()) return;
+    try {
+      const node = M.parse(src);
+      const names = new Set(); node.traverse(n => { if (n.isSymbolNode) names.add(n.name); });
+      f._uses = ['a','b','c'].filter(p => names.has(p) && !(p in base));
+      const code = node.compile(), sc = Object.assign({}, base), uses = f._uses;
+      f._fn = x => { sc.x = x; for (const p of uses) sc[p] = Pm[p]; try { return num(code.evaluate(sc)); } catch (e) { return NaN; } };
+      try { sc.x = 0.5; for (const p of uses) sc[p] = Pm[p]; code.evaluate(sc); }
+      catch (e) { if (/Undefined symbol|Wrong number|Unexpected type/.test(e.message)) { f._err = cleanErr(e); f._fn = null; } }
+    } catch (err) { f._err = cleanErr(err); }
+  });
+  graphStale = false;
+}
+function renderFuncList(){
+  flist.textContent = '';
+  funcs.forEach((f, i) => {
+    const row = el('div', 'frow'); row.style.setProperty('--c', `var(--c${(i % 6) + 1})`);
+    const sw = el('button', 'swatch'); sw.type = 'button';
+    sw.setAttribute('aria-pressed', String(f.on)); sw.setAttribute('aria-label', `${i + 1}번 함수 보이기`);
+    sw.addEventListener('click', () => { f.on = !f.on; sw.setAttribute('aria-pressed', String(f.on)); saveFuncs(); renderSliders(); reqGraph(); });
+    const ip = document.createElement('input');
+    Object.assign(ip, { className: 'fexpr', value: f.e, placeholder: '예: sin(x), x^2 - a', type: 'text', autocomplete: 'off', spellcheck: false });
+    ip.setAttribute('autocorrect', 'off'); ip.setAttribute('autocapitalize', 'off'); ip.setAttribute('enterkeyhint', 'done');
+    ip.setAttribute('aria-label', `${i + 1}번 함수 식`);
+    let t = 0;
+    ip.addEventListener('input', () => { f.e = ip.value; clearTimeout(t); t = setTimeout(() => { compileAll(); syncErrs(); renderSliders(); reqGraph(); saveFuncs(); }, 160); });
+    ip.addEventListener('keydown', e => { if (e.key === 'Enter') ip.blur(); });
+    const del = el('button', 'fdel', '×'); del.type = 'button'; del.setAttribute('aria-label', `${i + 1}번 함수 삭제`);
+    del.addEventListener('click', () => { funcs.splice(i, 1); saveFuncs(); compileAll(); renderFuncList(); renderSliders(); G.sel = null; reqGraph(); });
+    row.append(sw, ip, del); flist.appendChild(row);
+    const er = el('div', 'ferr', f._err || ''); er.hidden = !f._err; f._errEl = er; flist.appendChild(er);
+  });
+}
+function syncErrs(){ funcs.forEach(f => { if (f._errEl) { f._errEl.textContent = f._err || ''; f._errEl.hidden = !f._err; } }); }
+$('#addF').addEventListener('click', () => {
+  if (funcs.length >= 6) return;
+  funcs.push({ e: '', on: true }); saveFuncs(); compileAll(); renderFuncList();
+  const ins = flist.querySelectorAll('.fexpr'); ins[ins.length - 1].focus();
+});
+$('#toggleList').addEventListener('click', e => { const c = flist.classList.toggle('collapsed'); e.target.textContent = c ? '목록 펼치기' : '목록 접기'; });
+
+const sliderEls = {}, playing = { a: false, b: false, c: false }, dir = { a: 1, b: 1, c: 1 };
+function renderSliders(){
+  const used = new Set();
+  funcs.forEach(f => { if (f.on && f._fn) f._uses.forEach(u => used.add(u)); });
+  slidersEl.textContent = '';
+  ['a','b','c'].forEach(p => {
+    delete sliderEls[p];
+    if (!used.has(p)) { playing[p] = false; return; }
+    const row = el('div', 'srow');
+    const r = document.createElement('input'); Object.assign(r, { type: 'range', min: -10, max: 10, step: 0.01, value: Pm[p], id: 'sl-' + p });
+    const lb = el('label', 'slab', p); lb.htmlFor = r.id;
+    const out = el('output', 'sval', fmtN(Pm[p], 3));
+    const pl = el('button', 'splay', playing[p] ? '멈춤' : '재생'); pl.type = 'button';
+    r.addEventListener('input', () => { Pm[p] = parseFloat(r.value); out.textContent = fmtN(Pm[p], 3); reqGraph(); store.set('params', Pm); });
+    pl.addEventListener('click', () => { playing[p] = !playing[p]; pl.textContent = playing[p] ? '멈춤' : '재생'; if (playing[p]) startAnim(); else store.set('params', Pm); });
+    row.append(lb, r, out, pl); slidersEl.appendChild(row);
+    sliderEls[p] = { r, out };
+  });
+}
+let animOn = false, lastT = 0;
+function startAnim(){ if (animOn) return; animOn = true; lastT = performance.now(); requestAnimationFrame(tick); }
+function tick(t){
+  const dt = Math.min(0.05, (t - lastT) / 1000); lastT = t;
+  let any = false;
+  for (const p of ['a','b','c']) {
+    if (!playing[p]) continue; any = true;
+    let v = Pm[p] + dir[p] * dt * 3;
+    if (v > 10) { v = 10; dir[p] = -1; } if (v < -10) { v = -10; dir[p] = 1; }
+    Pm[p] = v;
+    const s = sliderEls[p]; if (s) { s.r.value = v; s.out.textContent = fmtN(v, 3); }
+  }
+  if (any) { if (activeTab === 'graph') drawGraph(); requestAnimationFrame(tick); } else animOn = false;
+}
+
+let gReq = false;
+function reqGraph(){ if (gReq) return; gReq = true; requestAnimationFrame(() => { gReq = false; if (activeTab === 'graph') drawGraph(); }); }
+let viewSave = 0;
+function saveView(){ clearTimeout(viewSave); viewSave = setTimeout(() => store.set('gview', { cx: G.cx, cy: G.cy, scale: G.scale }), 400); }
+const clampScale = s => Math.min(1e8, Math.max(1e-6, s));
+
+function golden(f, a, b, wantMax){
+  const r = (Math.sqrt(5) - 1) / 2, sgn = wantMax ? -1 : 1, F = x => sgn * f(x);
+  let c = b - r * (b - a), d = a + r * (b - a), fc = F(c), fd = F(d);
+  for (let i = 0; i < 50; i++) { if (fc < fd) { b = d; d = c; fd = fc; c = b - r * (b - a); fc = F(c); } else { a = c; c = d; fc = fd; d = a + r * (b - a); fd = F(d); } }
+  return (a + b) / 2;
+}
+function drawGraph(){
+  if (graphStale) { compileAll(); syncErrs(); renderSliders(); }
+  const { ctx, W, H } = prep(plotCv); if (!ctx) return;
+  const s = G.scale, X = x => W / 2 + (x - G.cx) * s, Y = y => H / 2 - (y - G.cy) * s;
+  const x0 = G.cx - W / 2 / s, x1 = G.cx + W / 2 / s, y0 = G.cy - H / 2 / s, y1 = G.cy + H / 2 / s, yspan = y1 - y0;
+  ctx.fillStyle = C.plotBg; ctx.fillRect(0, 0, W, H);
+
+  const step = niceStep(90 / s), mant = Math.round(step / Math.pow(10, Math.floor(Math.log10(step) + 1e-9)));
+  const minor = step / (mant === 2 ? 4 : 5);
+  const isMajor = v => Math.abs(v / step - Math.round(v / step)) < 1e-6;
+  ctx.lineWidth = 1;
+  for (const pass of [0, 1]) {
+    ctx.strokeStyle = pass ? C.major : C.minor; ctx.beginPath();
+    for (let i = Math.ceil(x0 / minor); i <= Math.floor(x1 / minor); i++) { const v = i * minor; if (isMajor(v) !== !!pass) continue; const px = Math.round(X(v)) + 0.5; ctx.moveTo(px, 0); ctx.lineTo(px, H); }
+    for (let i = Math.ceil(y0 / minor); i <= Math.floor(y1 / minor); i++) { const v = i * minor; if (isMajor(v) !== !!pass) continue; const py = Math.round(Y(v)) + 0.5; ctx.moveTo(0, py); ctx.lineTo(W, py); }
+    ctx.stroke();
+  }
+  ctx.strokeStyle = C.axis; ctx.lineWidth = 1.25; ctx.beginPath();
+  if (x0 < 0 && x1 > 0) { const px = Math.round(X(0)) + 0.5; ctx.moveTo(px, 0); ctx.lineTo(px, H); }
+  if (y0 < 0 && y1 > 0) { const py = Math.round(Y(0)) + 0.5; ctx.moveTo(0, py); ctx.lineTo(W, py); }
+  ctx.stroke();
+  ctx.font = `11px ${MONO}`; ctx.fillStyle = C.muted;
+  const ly = Math.min(H - 16, Math.max(4, Y(0) + 4));
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for (let i = Math.ceil(x0 / step); i <= Math.floor(x1 / step); i++) { const v = i * step; if (Math.abs(v) < step * 1e-6) continue; ctx.fillText(fmtAxis(v, step), X(v), ly); }
+  const lx = Math.min(W - 6, Math.max(4, X(0) + 5));
+  const rightSide = X(0) + 5 > W - 40;
+  ctx.textAlign = rightSide ? 'right' : 'left'; ctx.textBaseline = 'middle';
+  for (let i = Math.ceil(y0 / step); i <= Math.floor(y1 / step); i++) { const v = i * step; if (Math.abs(v) < step * 1e-6) continue; ctx.fillText(fmtAxis(v, step), rightSide ? W - 6 : lx, Y(v)); }
+
+  const N = Math.ceil(W), live = [];
+  funcs.forEach((f, fi) => {
+    if (!f.on || !f._fn) return;
+    const fn = f._fn, color = C.series[fi % 6];
+    const xs = new Float64Array(N + 1), ys = new Float64Array(N + 1);
+    for (let i = 0; i <= N; i++) { xs[i] = x0 + i / s; ys[i] = fn(xs[i]); }
+    ctx.beginPath(); let pen = false;
+    for (let i = 0; i <= N; i++) {
+      const y = ys[i]; if (!isFinite(y)) { pen = false; continue; }
+      const py = Y(y);
+      if (pen && Math.abs(py - Y(ys[i - 1])) > H) {
+        const ym = fn((xs[i] + xs[i - 1]) / 2), lo = Math.min(y, ys[i - 1]), hi = Math.max(y, ys[i - 1]);
+        if (!(isFinite(ym) && ym >= lo && ym <= hi)) pen = false;
+      }
+      const cy = Math.max(-1e4, Math.min(1e4, py));
+      if (!pen) { ctx.moveTo(i, cy); pen = true; } else ctx.lineTo(i, cy);
+    }
+    ctx.strokeStyle = color; ctx.lineWidth = 2.25; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+    live.push({ fi, fn, xs, ys, color });
+  });
+
+  const mk = [];
+  const ok = (a, b) => isFinite(a) && isFinite(b) && Math.abs(a - b) < yspan;
+  for (const L of live) {
+    const { fn, xs, ys, fi } = L;
+    for (let i = 1; i <= N && mk.length < 80; i++) {
+      const a = ys[i - 1], b = ys[i];
+      if (!ok(a, b) || a === 0) continue;
+      let r = NaN;
+      if (b === 0) r = xs[i]; else if ((a < 0) !== (b < 0)) r = bisect(fn, xs[i - 1], xs[i]);
+      if (isFinite(r) && Math.abs(fn(r)) < 1e-6 * Math.max(1, yspan)) mk.push({ t: '근', x: r, y: 0, fi });
+    }
+    for (let i = 1; i < N && mk.length < 80; i++) {
+      const a = ys[i - 1], b = ys[i], c = ys[i + 1];
+      if (!ok(a, b) || !ok(b, c)) continue;
+      const d1 = b - a, d2 = c - b;
+      if (d1 > 0 && d2 < 0) { const x = golden(fn, xs[i - 1], xs[i + 1], true); mk.push({ t: '극대', x, y: fn(x), fi }); }
+      else if (d1 < 0 && d2 > 0) { const x = golden(fn, xs[i - 1], xs[i + 1], false); mk.push({ t: '극소', x, y: fn(x), fi }); }
+    }
+  }
+  for (let p = 0; p < live.length; p++) for (let q = p + 1; q < live.length; q++) {
+    const A = live[p], B = live[q], h = x => A.fn(x) - B.fn(x);
+    for (let i = 1; i <= N && mk.length < 100; i++) {
+      const a = A.ys[i - 1] - B.ys[i - 1], b = A.ys[i] - B.ys[i];
+      if (!ok(A.ys[i - 1], A.ys[i]) || !ok(B.ys[i - 1], B.ys[i]) || !isFinite(a) || !isFinite(b)) continue;
+      if ((a < 0) !== (b < 0)) { const r = bisect(h, A.xs[i - 1], A.xs[i]); if (isFinite(r)) mk.push({ t: '교점', x: r, y: A.fn(r), fi: -1 }); }
+    }
+  }
+  G.markers = mk;
+  for (const m of mk) {
+    const px = X(m.x), py = Y(m.y); if (py < -10 || py > H + 10) continue;
+    const sel = G.sel && Math.abs(G.sel.x - m.x) < 1e-9 && G.sel.t === m.t;
+    ctx.beginPath(); ctx.arc(px, py, sel ? 6 : 3.5, 0, Math.PI * 2);
+    const col = m.fi < 0 ? C.ink : C.series[m.fi % 6];
+    ctx.fillStyle = sel ? col : C.plotBg; ctx.fill();
+    ctx.lineWidth = 1.75; ctx.strokeStyle = col; ctx.stroke();
+  }
+  if (G.trace != null) {
+    const px = X(G.trace);
+    ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = C.muted; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke(); ctx.restore();
+    const lines = [{ text: `x = ${fmtN(G.trace, 6)}` }];
+    for (const L of live) {
+      const y = L.fn(G.trace);
+      if (isFinite(y)) { ctx.beginPath(); ctx.arc(px, Y(y), 4.5, 0, Math.PI * 2); ctx.fillStyle = L.color; ctx.fill(); }
+      lines.push({ text: `y${L.fi + 1} = ${fmtN(y, 6)}`, color: L.color });
+    }
+    setReadout(readout, lines, clearGraphSel);
+  } else if (G.sel) {
+    const m = G.sel;
+    setReadout(readout, [{ text: `${m.t}  (${fmtN(m.x, 6)}, ${fmtN(m.y, 6)})`, color: m.fi < 0 ? C.ink : C.series[m.fi % 6] }], clearGraphSel);
+  } else setReadout(readout, null);
+}
+function clearGraphSel(){ G.trace = null; G.sel = null; reqGraph(); }
+gestures(plotCv, {
+  down(){ if (!hint.hidden) { hint.hidden = true; store.set('hintSeen', true); } },
+  snap: () => ({ cx: G.cx, cy: G.cy, scale: G.scale }),
+  pan(dx, dy, s0){ G.cx = s0.cx - dx / G.scale; G.cy = s0.cy + dy / G.scale; reqGraph(); saveView(); },
+  pinch(r, m, st){
+    const r0 = plotCv.getBoundingClientRect(), W = r0.width, H = r0.height, s0 = st.s;
+    const wx = s0.cx + (st.m.x - W / 2) / s0.scale, wy = s0.cy - (st.m.y - H / 2) / s0.scale;
+    G.scale = clampScale(s0.scale * r); G.cx = wx - (m.x - W / 2) / G.scale; G.cy = wy + (m.y - H / 2) / G.scale;
+    reqGraph(); saveView();
+  },
+  wheel(f, p){
+    const r0 = plotCv.getBoundingClientRect(), W = r0.width, H = r0.height;
+    const wx = G.cx + (p.x - W / 2) / G.scale, wy = G.cy - (p.y - H / 2) / G.scale;
+    G.scale = clampScale(G.scale * f); G.cx = wx - (p.x - W / 2) / G.scale; G.cy = wy + (p.y - H / 2) / G.scale;
+    reqGraph(); saveView();
+  },
+  tap(x, y){
+    const r0 = plotCv.getBoundingClientRect(), W = r0.width, H = r0.height;
+    const X = v => W / 2 + (v - G.cx) * G.scale, Y = v => H / 2 - (v - G.cy) * G.scale;
+    let best = null, bd = 22;
+    for (const m of G.markers) { const d = Math.hypot(X(m.x) - x, Y(m.y) - y); if (d < bd) { bd = d; best = m; } }
+    if (best) { G.sel = best; G.trace = null; }
+    else { const wx = G.cx + (x - W / 2) / G.scale; if (G.trace != null && Math.abs(X(G.trace) - x) < 12) G.trace = null; else G.trace = wx; G.sel = null; }
+    reqGraph();
+  }
+});
+const zoomBy = f => { G.scale = clampScale(G.scale * f); reqGraph(); saveView(); };
+$('#zin').addEventListener('click', () => zoomBy(1.5));
+$('#zout').addEventListener('click', () => zoomBy(1 / 1.5));
+$('#zreset').addEventListener('click', () => { G.cx = 0; G.cy = 0; G.scale = 40; reqGraph(); saveView(); });
+
+/* ---------- bode ---------- */
+const B = { expr: store.get('gexpr', '10/(s*(s+1)*(s+5))'), lo: store.get('blo', -2), hi: store.get('bhi', 3), trace: null, code: null, err: '', pm: null, gm: null };
+const bodeCv = $('#bode'), bodeRO = $('#bodeReadout'), gexpr = $('#gexpr'), marginsEl = $('#margins');
+gexpr.value = B.expr;
+function compileBode(){
+  B.code = null; B.err = '';
+  if (!B.expr.trim()) { B.err = 'G(s)를 입력하세요'; bodeStale = false; return; }
+  try {
+    const code = M.compile(normalize(B.expr));
+    const v = code.evaluate(Object.assign({}, scope, { s: M.complex(0, 1.234) }));
+    if (!(typeof v === 'number' || (v && v.isComplex))) throw new Error('s에 대한 식이어야 해요');
+    B.code = code;
+  } catch (e) { B.err = cleanErr(e); }
+  bodeStale = false;
+}
+function sample(lo, hi, N){
+  const lw = new Float64Array(N), mag = new Float64Array(N), ph = new Float64Array(N);
+  const sc = Object.assign({}, scope);
+  const G1 = w => { sc.s = M.complex(0, w); try { const v = B.code.evaluate(sc); return typeof v === 'number' ? { re: v, im: 0 } : (v && v.isComplex ? v : null); } catch (e) { return null; } };
+  let prev = null;
+  for (let l = -6; l < lo; l += 0.05) { const g = G1(Math.pow(10, l)); if (!g) continue; let p = Math.atan2(g.im, g.re) * 180 / Math.PI; if (prev !== null) { while (p - prev > 180) p -= 360; while (p - prev < -180) p += 360; } prev = p; }
+  for (let i = 0; i < N; i++) {
+    lw[i] = lo + (hi - lo) * i / (N - 1);
+    const g = G1(Math.pow(10, lw[i]));
+    if (!g || !isFinite(g.re) || !isFinite(g.im)) { mag[i] = NaN; ph[i] = NaN; continue; }
+    mag[i] = 20 * Math.log10(Math.hypot(g.re, g.im));
+    let p = Math.atan2(g.im, g.re) * 180 / Math.PI;
+    if (prev !== null) { while (p - prev > 180) p -= 360; while (p - prev < -180) p += 360; }
+    ph[i] = p; prev = p;
+  }
+  return { lw, mag, ph, N };
+}
+function computeMargins(){
+  B.pm = B.gm = null; if (!B.code) return;
+  const d = sample(-4, 6, 1400);
+  for (let i = 1; i < d.N; i++) {
+    const a = d.mag[i - 1], b = d.mag[i], pa = d.ph[i - 1], pb = d.ph[i];
+    if (!isFinite(a) || !isFinite(b) || !isFinite(pa) || !isFinite(pb)) continue;
+    if (!B.pm && (a >= 0) !== (b >= 0)) {
+      const t = a / (a - b), p = pa + t * (pb - pa), raw = 180 + p;
+      B.pm = { lw: d.lw[i - 1] + t * (d.lw[i] - d.lw[i - 1]), v: ((raw % 360) + 540) % 360 - 180, ph: p };
+    }
+    const qa = Math.floor((pa + 180) / 360), qb = Math.floor((pb + 180) / 360);
+    if (!B.gm && qa !== qb) {
+      const target = Math.max(qa, qb) * 360 - 180, t = (target - pa) / (pb - pa), m = a + t * (b - a);
+      B.gm = { lw: d.lw[i - 1] + t * (d.lw[i] - d.lw[i - 1]), v: -m, ph: target };
+    }
+    if (B.pm && B.gm) break;
+  }
+}
+function renderMargins(){
+  marginsEl.textContent = '';
+  if (!B.code) { marginsEl.appendChild(el('div', 'm-err', B.err)); return; }
+  const line = (label, val, w, none) => {
+    const d = el('div');
+    if (val == null) { d.textContent = `${label}: ${none}`; }
+    else { d.append(`${label} `); d.appendChild(el('span', 'm-val', val)); d.append(`  (ω = ${fmtN(w, 4)} rad/s)`); }
+    marginsEl.appendChild(d);
+  };
+  line('위상 여유', B.pm ? `${fmtN(B.pm.v, 4)}°` : null, B.pm && Math.pow(10, B.pm.lw), '0 dB 교차가 없어요');
+  line('이득 여유', B.gm ? `${fmtN(B.gm.v, 4)} dB` : null, B.gm && Math.pow(10, B.gm.lw), '−180° 교차가 없어요');
+}
+let bReq = false;
+function reqBode(){ if (bReq) return; bReq = true; requestAnimationFrame(() => { bReq = false; if (activeTab === 'bode') drawBode(); }); }
+const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+const pickStep = (span, c) => { for (const v of c) if (span / v <= 6) return v; return c[c.length - 1]; };
+function drawBode(){
+  if (bodeStale) { compileBode(); computeMargins(); renderMargins(); }
+  const { ctx, W, H } = prep(bodeCv); if (!ctx) return;
+  ctx.fillStyle = C.plotBg; ctx.fillRect(0, 0, W, H);
+  ctx.font = `11px ${MONO}`;
+  if (!B.code) { ctx.fillStyle = C.err; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(B.err, W / 2, H / 2); setReadout(bodeRO, null); return; }
+  const L = 50, R = 14, T = 12, Bm = 26, gap = 28, ph = (H - T - Bm - gap) / 2, pw = W - L - R;
+  if (ph < 40 || pw < 60) return;
+  const X = lw => L + (lw - B.lo) / (B.hi - B.lo) * pw;
+  const d = sample(B.lo, B.hi, Math.max(200, Math.min(700, Math.round(pw * 1.5))));
+  const rng = arr => { let a = Infinity, b = -Infinity; for (const v of arr) if (isFinite(v)) { if (v < a) a = v; if (v > b) b = v; } return [a, b]; };
+  let [m0, m1] = rng(d.mag); if (!isFinite(m0)) { m0 = -40; m1 = 40; }
+  const mS = pickStep(m1 - m0, [10, 20, 40, 60, 100, 200]);
+  let mLo = Math.floor(m0 / mS) * mS, mHi = Math.ceil(m1 / mS) * mS; if (mHi - mLo < 2 * mS) { mHi += mS; mLo -= mS; }
+  let [p0, p1] = rng(d.ph); if (!isFinite(p0)) { p0 = -180; p1 = 0; }
+  const pS = pickStep(p1 - p0, [15, 30, 45, 90, 180, 360]);
+  let pLo = Math.floor(p0 / pS) * pS, pHi = Math.ceil(p1 / pS) * pS; if (pHi - pLo < 2 * pS) { pHi += pS; pLo -= pS; }
+  const panes = [
+    { top: T, lo: mLo, hi: mHi, step: mS, data: d.mag, unit: ' dB', ref: 0, title: '|G| dB' },
+    { top: T + ph + gap, lo: pLo, hi: pHi, step: pS, data: d.ph, unit: '°', ref: -180, title: '∠G °' }
+  ];
+  panes.forEach(P => { P.Y = v => P.top + (P.hi - v) / (P.hi - P.lo) * ph; });
+  for (const P of panes) {
+    ctx.save(); ctx.beginPath(); ctx.rect(L, P.top, pw, ph); ctx.clip();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = C.minor; ctx.beginPath();
+    if (B.hi - B.lo < 7) for (let dd = Math.floor(B.lo); dd <= Math.ceil(B.hi); dd++) for (let k = 2; k <= 9; k++) { const x = Math.round(X(dd + Math.log10(k))) + 0.5; ctx.moveTo(x, P.top); ctx.lineTo(x, P.top + ph); }
+    ctx.stroke();
+    ctx.strokeStyle = C.major; ctx.beginPath();
+    for (let dd = Math.ceil(B.lo); dd <= Math.floor(B.hi); dd++) { const x = Math.round(X(dd)) + 0.5; ctx.moveTo(x, P.top); ctx.lineTo(x, P.top + ph); }
+    for (let v = P.lo; v <= P.hi + 1e-9; v += P.step) { const y = Math.round(P.Y(v)) + 0.5; ctx.moveTo(L, y); ctx.lineTo(L + pw, y); }
+    ctx.stroke();
+    if (P.ref >= P.lo && P.ref <= P.hi) { ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = C.axis; ctx.beginPath(); const y = Math.round(P.Y(P.ref)) + 0.5; ctx.moveTo(L, y); ctx.lineTo(L + pw, y); ctx.stroke(); ctx.restore(); }
+    ctx.beginPath(); let pen = false;
+    for (let i = 0; i < d.N; i++) { const v = P.data[i]; if (!isFinite(v)) { pen = false; continue; } const x = X(d.lw[i]), y = P.Y(v); if (!pen) { ctx.moveTo(x, y); pen = true; } else ctx.lineTo(x, y); }
+    ctx.strokeStyle = C.series[0]; ctx.lineWidth = 2.25; ctx.lineJoin = 'round'; ctx.stroke();
+    ctx.restore();
+    ctx.strokeStyle = C.major; ctx.lineWidth = 1; ctx.strokeRect(L + 0.5, P.top + 0.5, pw - 1, ph - 1);
+    ctx.fillStyle = C.muted; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let v = P.lo; v <= P.hi + 1e-9; v += P.step) ctx.fillText(pretty(String(Math.round(v))), L - 6, P.Y(v));
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(P.title, L + 6, P.top + 5);
+  }
+  ctx.fillStyle = C.muted; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const yb = panes[1].top + ph + 6;
+  for (let dd = Math.ceil(B.lo); dd <= Math.floor(B.hi); dd++) ctx.fillText('10' + String(dd).split('').map(c => SUP[c]).join(''), X(dd), yb);
+  ctx.textAlign = 'right'; ctx.fillText('ω rad/s', L + pw, yb + 0);
+  const mark = (m, color) => {
+    if (!m || m.lw < B.lo || m.lw > B.hi) return;
+    const x = X(m.lw), yMag = panes[0].Y(m === B.pm ? 0 : -m.v), yPh = panes[1].Y(m.ph);
+    ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = color; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, yMag); ctx.lineTo(x, yPh); ctx.stroke(); ctx.restore();
+    for (const y of [yMag, yPh]) { ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fillStyle = C.plotBg; ctx.fill(); ctx.lineWidth = 1.75; ctx.strokeStyle = color; ctx.stroke(); }
+  };
+  mark(B.pm, C.series[2]); mark(B.gm, C.series[1]);
+  if (B.trace != null && B.trace >= B.lo && B.trace <= B.hi) {
+    const x = X(B.trace), w = Math.pow(10, B.trace);
+    const one = sample(B.trace, B.trace + 1e-9, 2);
+    ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = C.muted; ctx.beginPath(); ctx.moveTo(x, panes[0].top); ctx.lineTo(x, panes[1].top + ph); ctx.stroke(); ctx.restore();
+    const mv = one.mag[0], pv = one.ph[0];
+    if (isFinite(mv)) { ctx.beginPath(); ctx.arc(x, panes[0].Y(mv), 4.5, 0, Math.PI * 2); ctx.fillStyle = C.series[0]; ctx.fill(); }
+    if (isFinite(pv)) { ctx.beginPath(); ctx.arc(x, panes[1].Y(pv), 4.5, 0, Math.PI * 2); ctx.fillStyle = C.series[0]; ctx.fill(); }
+    setReadout(bodeRO, [
+      { text: `ω = ${fmtN(w, 4)} rad/s (${fmtN(w / (2 * Math.PI), 4)} Hz)` },
+      { text: `|G| = ${fmtN(mv, 4)} dB` },
+      { text: `∠G = ${fmtN(pv, 4)}°` }
+    ], () => { B.trace = null; reqBode(); });
+  } else setReadout(bodeRO, null);
+}
+let bSave = 0;
+const saveBodeView = () => { clearTimeout(bSave); bSave = setTimeout(() => { store.set('blo', B.lo); store.set('bhi', B.hi); }, 400); };
+const bodeX = () => { const r = bodeCv.getBoundingClientRect(); return { L: 50, pw: r.width - 64 }; };
+function setRange(lo, hi){ const span = Math.min(12, Math.max(0.5, hi - lo)), c = (lo + hi) / 2; B.lo = Math.max(-9, Math.min(9 - span, c - span / 2)); B.hi = B.lo + span; }
+gestures(bodeCv, {
+  snap: () => ({ lo: B.lo, hi: B.hi }),
+  pan(dx, dy, s0){ const { pw } = bodeX(), sh = -dx / pw * (s0.hi - s0.lo); setRange(s0.lo + sh, s0.hi + sh); reqBode(); saveBodeView(); },
+  pinch(r, m, st){
+    const { L, pw } = bodeX(), s0 = st.s, span = (s0.hi - s0.lo) / r;
+    const c = s0.lo + (st.m.x - L) / pw * (s0.hi - s0.lo), fr = (m.x - L) / pw;
+    setRange(c - fr * span, c - fr * span + span); reqBode(); saveBodeView();
+  },
+  wheel(f, p){
+    const { L, pw } = bodeX(), span = (B.hi - B.lo) / f, c = B.lo + (p.x - L) / pw * (B.hi - B.lo), fr = (p.x - L) / pw;
+    setRange(c - fr * span, c - fr * span + span); reqBode(); saveBodeView();
+  },
+  tap(x){
+    const { L, pw } = bodeX(); if (x < L || x > L + pw) return;
+    const lw = B.lo + (x - L) / pw * (B.hi - B.lo);
+    if (B.trace != null && Math.abs((B.trace - lw) / (B.hi - B.lo) * pw) < 12) B.trace = null; else B.trace = lw;
+    reqBode();
+  }
+});
+let gT = 0;
+gexpr.addEventListener('input', () => { B.expr = gexpr.value; clearTimeout(gT); gT = setTimeout(() => { store.set('gexpr', B.expr); compileBode(); computeMargins(); renderMargins(); reqBode(); }, 200); });
+gexpr.addEventListener('keydown', e => { if (e.key === 'Enter') gexpr.blur(); });
+const PRESETS = [
+  ['개루프 3차', '10/(s*(s+1)*(s+5))'], ['1차 저역통과', '100/(s+100)'], ['2차 공진', '100/(s^2 + 2*s + 100)'],
+  ['노치 필터', '(s^2 + 100)/(s^2 + 5*s + 100)'], ['PI 제어기', '2*(s+1)/s'], ['시간 지연', 'exp(-0.1*s)*10/(s+1)']
+];
+const presetsEl = $('#bodePresets');
+PRESETS.forEach(([label, ex]) => {
+  const b = el('button', 'chip util', label); b.type = 'button';
+  b.addEventListener('click', () => { gexpr.value = B.expr = ex; store.set('gexpr', ex); B.trace = null; compileBode(); computeMargins(); renderMargins(); setRange(-2, 3); reqBode(); saveBodeView(); });
+  presetsEl.appendChild(b);
+});
+
+/* ---------- tabs, theme, resize ---------- */
+let activeTab = store.get('tab', 'calc');
+function showTab(t){
+  activeTab = t;
+  document.querySelectorAll('.tab').forEach(s => s.classList.toggle('active', s.id === 'tab-' + t));
+  document.querySelectorAll('.tabbar button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === t)));
+  store.set('tab', t);
+  if (t === 'graph') reqGraph();
+  if (t === 'bode') reqBode();
+}
+document.querySelectorAll('.tabbar button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+const onTheme = () => { readColors(); reqGraph(); reqBode(); };
+if (mq.addEventListener) mq.addEventListener('change', onTheme); else if (mq.addListener) mq.addListener(onTheme);
+if (window.ResizeObserver) { new ResizeObserver(reqGraph).observe($('#plotwrap')); new ResizeObserver(reqBode).observe($('#bodewrap')); }
+window.addEventListener('resize', () => { reqGraph(); reqBode(); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { reqGraph(); reqBode(); });
+
+/* ---------- home-screen icon ---------- */
+(function(){
+  const c = document.createElement('canvas'); c.width = c.height = 180;
+  const x = c.getContext('2d');
+  x.fillStyle = '#1C1A18'; x.fillRect(0, 0, 180, 180);
+  x.strokeStyle = '#3A3632'; x.lineWidth = 2;
+  for (let i = 30; i < 180; i += 30) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 180); x.moveTo(0, i); x.lineTo(180, i); x.stroke(); }
+  x.strokeStyle = '#E0B23A'; x.lineWidth = 9; x.lineCap = 'round'; x.beginPath();
+  for (let i = 0; i <= 140; i++) { const px = 20 + i, py = 90 - 42 * Math.sin(i / 140 * Math.PI * 2); i ? x.lineTo(px, py) : x.moveTo(px, py); }
+  x.stroke();
+  const l = document.createElement('link'); l.rel = 'apple-touch-icon'; l.href = c.toDataURL('image/png'); document.head.appendChild(l);
+})();
+
+readColors(); syncAngle(); renderHist(); compileAll(); renderFuncList(); renderSliders();
+compileBode(); computeMargins(); renderMargins();
+showTab(['calc','graph','bode'].includes(activeTab) ? activeTab : 'calc');
+})();
+</script>
+</body>
+</html>
