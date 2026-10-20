@@ -77,6 +77,38 @@ main{flex:1;min-height:0;position:relative}
 .entry{padding:6px 16px 2px;background:var(--paper);border-top:1px solid var(--line)}
 #expr{width:100%;font-family:var(--mono);font-size:22px;border:0;background:transparent;color:var(--ink);outline:none;padding:6px 0;caret-color:var(--blue)}
 #expr::placeholder{color:var(--muted);opacity:.7}
+.nat{display:flex;align-items:center;min-height:58px;padding:6px 2px;overflow-x:auto;overflow-y:hidden;font-family:var(--mono);font-size:22px;line-height:1.2;white-space:nowrap;color:var(--ink);outline:none;cursor:text;scrollbar-width:none;-webkit-user-select:none;user-select:none}
+.nat::-webkit-scrollbar{display:none}
+.nat:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+.nat[hidden],#expr[hidden]{display:none}
+.mr{display:inline-flex;align-items:center;flex:none}
+.t{white-space:pre}
+.t.o{padding:0 .1em}
+.ph{color:var(--muted);opacity:.7;font-family:var(--sans);font-size:.8em;padding-left:.3em}
+.slot{display:inline-flex;align-items:center;justify-content:center;width:.62em;height:.95em;margin:0 .05em;border:1.5px dashed var(--line-strong);border-radius:2px}
+.slot.on{border-style:solid;border-color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,transparent)}
+.caret{display:inline-block;width:0;height:1.1em;margin:0 -1px;border-left:2px solid var(--blue);animation:blink 1.05s steps(1) infinite}
+.slot .caret{height:.75em}
+@keyframes blink{50%{opacity:0}}
+.mf{display:inline-flex;flex-direction:column;align-items:stretch;margin:0 .14em;font-size:.94em}
+.mf>.mr{justify-content:center;padding:0 .12em}
+.mf>.mr:first-child{border-bottom:1.5px solid currentColor;padding-bottom:.1em}
+.mf>.mr:last-child{padding-top:.1em}
+.ms{position:relative;display:inline-flex;align-items:stretch;padding-left:.62em;margin:0 .06em}
+.ms>svg{position:absolute;left:0;top:0;width:.64em;height:100%;overflow:visible}
+.ms>.mr{border-top:1.5px solid currentColor;padding:.14em .1em 0 .06em}
+.mrt{display:inline-flex;align-items:flex-start}
+.mrt>.mr:first-child{font-size:.6em;margin-right:-.5em;margin-top:.05em;position:relative;z-index:1}
+.mrt>.ms{align-self:center}
+.mp{display:inline-flex;flex-direction:column;align-items:flex-start;font-size:.7em}
+.mp>.ghost{visibility:hidden;width:0;overflow:hidden;padding-bottom:.8em}
+.ml{display:inline-flex;align-items:center}
+.ml>.mr:nth-child(2){align-self:flex-end;font-size:.7em;margin-top:.7em}
+.ma{display:inline-flex;align-items:center;border-left:1.5px solid currentColor;border-right:1.5px solid currentColor;padding:0 .14em;margin:0 .1em}
+.h-expr.nx{overflow-x:auto;scrollbar-width:none;font-size:15px;padding:2px 0}
+.h-expr.nx::-webkit-scrollbar{display:none}
+.h-sub.nx{display:flex;justify-content:flex-end}
+.preview.bad{color:var(--err)}
 .preview{font-family:var(--mono);font-size:14px;color:var(--muted);min-height:21px;text-align:right;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .chips{display:flex;gap:6px;overflow-x:auto;padding:6px 12px;background:var(--paper);scrollbar-width:none;flex:none}
 .chips::-webkit-scrollbar{display:none}
@@ -87,11 +119,18 @@ main{flex:1;min-height:0;position:relative}
 #clearHist{margin-top:14px}
 :root{--vh:100vh}
 @supports (height:100dvh){:root{--vh:100dvh}}
-.keypad{--kh:clamp(30px,calc((var(--vh) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 310px) / 11),44px);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:var(--kh);gap:4px;padding:4px 8px 8px;background:var(--paper);flex:none}
+.keypad{--kh:clamp(30px,calc((var(--vh) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 330px) / 12),44px);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:var(--kh);gap:4px;padding:4px 8px 8px;background:var(--paper);flex:none}
 .key{min-width:0;padding:0;border:0;border-radius:8px;font-size:19px;line-height:1;white-space:nowrap;background:var(--key);color:var(--key-ink);box-shadow:inset 0 -2px 0 var(--key-edge);user-select:none;-webkit-user-select:none}
 .key.fn{background:var(--key-fn);font-family:var(--mono);font-size:14.5px}
 .key.an{background:color-mix(in srgb,var(--key-op) 60%,var(--key-fn));font-family:var(--sans);font-size:14px;font-weight:500}
 .key.tall{grid-row:span 2}
+.kfr{display:inline-flex;flex-direction:column;align-items:center;gap:2px;vertical-align:middle}
+.kfr i,.kb{display:inline-block;width:9px;height:9px;border:1.4px solid currentColor;border-radius:1.5px;vertical-align:middle}
+.kfr b{display:block;width:14px;height:1.5px;background:currentColor}
+.kbs{display:inline-block;width:6px;height:6px;border:1.2px solid currentColor;border-radius:1px}
+.kbs.up{vertical-align:8px;margin-left:1px}
+.kbs.dn{vertical-align:-5px;margin-left:1px}
+.kbs.pre{vertical-align:8px;margin-right:-1px}
 .key.op{background:var(--key-op);color:var(--blue);font-size:20px}
 .key.eq{background:var(--key-eq);color:var(--key-eq-ink);font-weight:600;font-size:22px;box-shadow:none}
 .key:active{transform:translateY(1px);box-shadow:none}
@@ -150,7 +189,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 .ex code{display:block;font-family:var(--mono);font-size:14.5px;color:var(--ink);overflow-wrap:anywhere}
 .ex span{font-size:13px;color:var(--muted)}
 @media (max-height:520px){#tab-calc{overflow-y:auto}.history{flex:none;height:90px}}
-@media (prefers-reduced-motion: reduce){.key:active{transform:none}}
+@media (prefers-reduced-motion: reduce){.key:active{transform:none}.caret{animation:none}}
 </style>
 </head>
 <body>
@@ -158,7 +197,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
   <h1>J 계산기</h1>
   <div class="top-actions">
     <button id="exBtn" class="angle" type="button">예시</button>
-    <button id="kbdBtn" class="angle" type="button" aria-pressed="false" aria-label="기기 키보드 켜기">⌨</button>
+    <button id="kbdBtn" class="angle" type="button" aria-pressed="false" aria-label="텍스트 입력으로 전환">⌨</button>
     <button id="angleBtn" class="angle" type="button" aria-label="각도 단위 전환">RAD</button>
   </div>
 </header>
@@ -167,7 +206,8 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
   <section id="tab-calc" class="tab" aria-label="계산">
     <div id="history" class="history" aria-live="polite"></div>
     <div class="entry">
-      <input id="expr" type="text" inputmode="none" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="수식 입력" aria-label="수식">
+      <div id="nat" class="nat" tabindex="0" role="textbox" aria-label="수식 (자연 표시)"></div>
+      <input id="expr" hidden type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="수식 입력" aria-label="수식">
       <div id="preview" class="preview"></div>
     </div>
     
@@ -380,7 +420,11 @@ function numHint(v){
   const p = frac(v / Math.PI, 24);
   if (p && p.n !== 0) { const t = p.n === 1 ? 'π' : p.n === -1 ? '-π' : `${p.n}π`; return `= ${p.d === 1 ? t : t + '/' + p.d}`; }
   const q = frac(v * v, 1);
-  if (q && q.n > 1 && q.n < 10000) return `= ${v < 0 ? '-' : ''}√${q.n}`;
+  if (q && q.n > 1 && q.n < 10000) {
+    let k = Math.floor(Math.sqrt(q.n)); while (q.n % (k * k)) k--;
+    const m = q.n / (k * k);
+    if (m > 1) return `= ${v < 0 ? '-' : ''}${k > 1 ? k : ''}√${m}`;
+  }
   return '';
 }
 function describe(node, val){
@@ -421,36 +465,261 @@ function fmtN(v, p = 4){
 function run(src, sc){ const node = M.parse(normalize(src)); return { node, val: node.compile().evaluate(sc) }; }
 
 /* ---------- calculator ---------- */
-const inp = $('#expr'), previewEl = $('#preview');
+const inp = $('#expr'), previewEl = $('#preview'), natEl = $('#nat');
 let hist = store.get('hist', []);
 let caret = 0;
 let graphStale = true, bodeStale = true;
 hist.forEach(it => { if (it.err) return; try { const r = run(it.e, scope); const v = (r.val && r.val.isResultSet) ? r.val.entries[r.val.entries.length - 1] : r.val; if (v !== undefined && typeof v !== 'function') scope.ans = v; } catch (e) {} });
 
+/* ---------- natural display editor ----------
+   A row is an array of items. An item is a token string ('7', '+', 'sin(') or a template node
+   with slot rows: frac {a over b}, sqrt {a}, root {n-th root of a}, pow {exponent a},
+   logb {log base b of a}, abs {|a|}. The cursor is a row, an index in it, and the stack of
+   template slots that lead down to it. */
+const SLOTS = { frac: ['a', 'b'], sqrt: ['a'], root: ['n', 'a'], pow: ['a'], logb: ['b', 'a'], abs: ['a'] };
+const DISP = { '*': '×', '/': '÷', '-': '−', 'pi': 'π', 'sqrt(': '√(', 'cbrt(': '∛(', 'asin(': 'sin⁻¹(', 'acos(': 'cos⁻¹(', 'atan(': 'tan⁻¹(',
+  'log(': 'ln(', 'log10(': 'log(', 'combinations(': 'nCr(', 'permutations(': 'nPr(' };
+const OPS = new Set(['+', '-', '*', '/', '=', '∠']);
+const RAD_SVG = '<svg viewBox="0 0 10 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0.5 14.5 L3 13 L6.6 23.2 L9.6 0.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>';
+class EmptySlot extends Error { constructor(){ super('빈 칸을 채워 주세요'); } }
+let natMode = store.get('natural', true) !== false;
+let root = [], cur = { stack: [], row: root, i: 0 };
+
+function tokenize(src){ return String(src).match(/\s*[A-Za-z_]\w*\(|\s*[A-Za-z_]\w*\s*|\d|\s+|[\s\S]/g) || []; }
+function toStr(row, strict){
+  let s = '';
+  for (const it of row) {
+    if (typeof it === 'string') { s += it; continue; }
+    const g = k => { if (!it[k].length && strict) throw new EmptySlot(); return toStr(it[k], strict); };
+    if (it.t !== 'pow' && /[A-Za-z_]\w*\s*$/.test(s)) s += '*';
+    const w = x => /^[\w.]+$/.test(x) ? x : `(${x})`;
+    switch (it.t) {
+      case 'frac': s += `(${w(g('a'))}/${w(g('b'))})`; break;
+      case 'sqrt': s += `sqrt(${g('a')})`; break;
+      case 'root': s += `nthRoot(${g('a')}, ${g('n')})`; break;
+      case 'pow':  s += `^${w(g('a'))}`; break;
+      case 'logb': s += `log(${g('a')}, ${g('b')})`; break;
+      case 'abs':  s += `abs(${g('a')})`; break;
+    }
+  }
+  return s;
+}
+const clone = r => JSON.parse(JSON.stringify(r));
+const isEmptyNode = n => SLOTS[n.t].every(k => !n[k].length);
+
+function natInsert(toks){ for (const t of toks) { cur.row.splice(cur.i, 0, t); cur.i++; } }
+function natNode(t, opt = {}){
+  const n = { t };
+  SLOTS[t].forEach(k => { n[k] = opt.pre && opt.pre[k] ? opt.pre[k].slice() : []; });
+  cur.row.splice(cur.i, 0, n);
+  if (opt.after) { cur.i++; return; }
+  const k = opt.slot || SLOTS[t][0];
+  cur.stack.push({ row: cur.row, idx: cur.i, key: k });
+  cur.row = n[k]; cur.i = n[k].length;
+}
+function enterSlot(row, idx, key, atEnd){
+  const n = row[idx]; cur.stack.push({ row, idx, key }); cur.row = n[key]; cur.i = atEnd ? cur.row.length : 0;
+}
+function natLeft(){
+  if (cur.i > 0) {
+    const it = cur.row[cur.i - 1];
+    if (typeof it === 'string') cur.i--;
+    else { const ks = SLOTS[it.t]; enterSlot(cur.row, cur.i - 1, ks[ks.length - 1], true); }
+    return;
+  }
+  if (!cur.stack.length) return;
+  const f = cur.stack[cur.stack.length - 1], n = f.row[f.idx], ks = SLOTS[n.t], k = ks.indexOf(f.key);
+  if (k > 0) { f.key = ks[k - 1]; cur.row = n[f.key]; cur.i = cur.row.length; }
+  else { cur.stack.pop(); cur.row = f.row; cur.i = f.idx; }
+}
+function natRight(){
+  if (cur.i < cur.row.length) {
+    const it = cur.row[cur.i];
+    if (typeof it === 'string') cur.i++;
+    else enterSlot(cur.row, cur.i, SLOTS[it.t][0], false);
+    return;
+  }
+  if (!cur.stack.length) return;
+  const f = cur.stack[cur.stack.length - 1], n = f.row[f.idx], ks = SLOTS[n.t], k = ks.indexOf(f.key);
+  if (k < ks.length - 1) { f.key = ks[k + 1]; cur.row = n[f.key]; cur.i = 0; }
+  else { cur.stack.pop(); cur.row = f.row; cur.i = f.idx + 1; }
+}
+function natVert(dir){
+  for (let j = cur.stack.length - 1; j >= 0; j--) {
+    const f = cur.stack[j], n = f.row[f.idx];
+    const to = n.t !== 'frac' ? null : dir < 0 ? (f.key === 'b' ? 'a' : null) : (f.key === 'a' ? 'b' : null);
+    if (to) { cur.stack.length = j + 1; f.key = to; cur.row = n[to]; cur.i = Math.min(cur.i, cur.row.length); return; }
+  }
+  // not inside a fraction: step into a neighbouring fraction
+  const pick = cur.row[cur.i - 1] && cur.row[cur.i - 1].t === 'frac' ? cur.i - 1 : cur.row[cur.i] && cur.row[cur.i].t === 'frac' ? cur.i : -1;
+  if (pick >= 0) enterSlot(cur.row, pick, dir < 0 ? 'a' : 'b', pick < cur.i);
+}
+function natBack(){
+  const r = cur.row;
+  if (cur.i > 0) {
+    const it = r[cur.i - 1];
+    if (typeof it === 'string' || isEmptyNode(it)) { r.splice(cur.i - 1, 1); cur.i--; }
+    else natLeft();
+    return;
+  }
+  if (!cur.stack.length) return;
+  const f = cur.stack[cur.stack.length - 1], n = f.row[f.idx], ks = SLOTS[n.t];
+  if (ks.indexOf(f.key) > 0) return natLeft();
+  if (ks.some(k => k !== f.key && n[k].length)) { cur.stack.pop(); cur.row = f.row; cur.i = f.idx; return; }
+  const keep = n[f.key];
+  cur.stack.pop(); f.row.splice(f.idx, 1, ...keep); cur.row = f.row; cur.i = f.idx;
+}
+function natClear(){ root = []; cur = { stack: [], row: root, i: 0 }; }
+function natLoad(tree){ root = tree; cur = { stack: [], row: root, i: root.length }; }
+function findEmpty(row, frames){
+  for (let idx = 0; idx < row.length; idx++) {
+    const n = row[idx]; if (typeof n === 'string') continue;
+    for (const k of SLOTS[n.t]) {
+      const fr = frames.concat([{ row, idx, key: k }]);
+      if (!n[k].length) return { stack: fr, row: n[k], i: 0 };
+      const hit = findEmpty(n[k], fr); if (hit) return hit;
+    }
+  }
+  return null;
+}
+
+const rowPath = new WeakMap(), elPos = new WeakMap();
+const caretEl = () => el('span', 'caret');
+function renderRow(row, frames, live){
+  const box = el('span', 'mr');
+  const here = live && row === cur.row;
+  if (live) rowPath.set(row, frames);
+  if (!row.length) {
+    if (live && !frames.length) { box.appendChild(caretEl()); box.appendChild(el('span', 'ph', '수식 입력')); return box; }
+    const sl = el('span', 'slot' + (here ? ' on' : ''));
+    if (here) sl.appendChild(caretEl());
+    if (live) elPos.set(sl, { row, i: 0, slot: true });
+    box.appendChild(sl); return box;
+  }
+  row.forEach((it, idx) => {
+    if (here && cur.i === idx) box.appendChild(caretEl());
+    let e;
+    if (typeof it === 'string') e = el('span', 't' + (OPS.has(it.trim()) ? ' o' : ''), DISP[it] != null ? DISP[it] : it);
+    else e = renderNode(it, row, idx, frames, live);
+    if (live) elPos.set(e, { row, i: idx });
+    box.appendChild(e);
+  });
+  if (here && cur.i === row.length) box.appendChild(caretEl());
+  return box;
+}
+function renderNode(n, row, idx, frames, live){
+  const sub = k => renderRow(n[k], live ? frames.concat([{ row, idx, key: k }]) : frames, live);
+  const radical = inner => { const r = el('span', 'ms'); r.innerHTML = RAD_SVG; r.appendChild(inner); return r; };
+  let e;
+  switch (n.t) {
+    case 'frac': e = el('span', 'mf'); e.append(sub('a'), sub('b')); break;
+    case 'sqrt': e = radical(sub('a')); break;
+    case 'root': e = el('span', 'mrt'); e.append(sub('n'), radical(sub('a'))); break;
+    case 'pow':  { e = el('span', 'mp'); const g = renderRow(n.a, frames, false); g.classList.add('ghost'); g.setAttribute('aria-hidden', 'true'); e.append(sub('a'), g); break; }
+    case 'logb': e = el('span', 'ml'); e.append(el('span', 't', 'log'), sub('b'), el('span', 't', '('), sub('a'), el('span', 't', ')')); break;
+    case 'abs':  e = el('span', 'ma'); e.append(sub('a')); break;
+    default: e = el('span', 't', '?');
+  }
+  return e;
+}
+function renderNat(){
+  natEl.textContent = '';
+  natEl.appendChild(renderRow(root, [], true));
+  const c = natEl.querySelector('.caret');
+  if (c) {
+    const a = c.getBoundingClientRect(), b = natEl.getBoundingClientRect();
+    if (a.left < b.left + 12) natEl.scrollLeft -= (b.left + 12 - a.left);
+    else if (a.right > b.right - 12) natEl.scrollLeft += (a.right - b.right + 12);
+  }
+  updatePreview();
+}
+natEl.addEventListener('click', e => {
+  let t = e.target;
+  while (t && t !== natEl && !elPos.has(t)) t = t.parentElement;
+  if (!t || t === natEl) { cur = { stack: [], row: root, i: root.length }; renderNat(); return; }
+  const pos = elPos.get(t), frames = rowPath.get(pos.row) || [];
+  let i = pos.i;
+  if (!pos.slot) { const r = t.getBoundingClientRect(); if (e.clientX > r.left + r.width / 2) i++; }
+  cur = { stack: frames.map(f => Object.assign({}, f)), row: pos.row, i };
+  renderNat();
+});
+natEl.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  const act = {
+    ArrowLeft: natLeft, ArrowRight: natRight, ArrowUp: () => natVert(-1), ArrowDown: () => natVert(1), Backspace: natBack,
+    Escape: natClear
+  }[k];
+  if (k === 'Enter') { e.preventDefault(); commit(); return; }
+  if (act) { e.preventDefault(); act(); renderNat(); return; }
+  if (k.length !== 1) return;
+  e.preventDefault();
+  if (k === '^') natKey({ node: 'pow', post: true });
+  else natKey(k);
+});
+
+/* entry: works in natural and text mode */
+function entrySource(strict){ return natMode ? toStr(root, strict).trim() : inp.value.trim(); }
+function setEntryText(text){
+  if (natMode) { natLoad(tokenize(text)); renderNat(); }
+  else { inp.value = text; caret = text.length; updatePreview(); }
+}
+function clearEntry(){
+  if (natMode) { natClear(); renderNat(); }
+  else { inp.value = ''; caret = 0; updatePreview(); }
+}
+
+function hintNode(sub){
+  // "= 3/4", "= −2π/3", "= √2" → natural display
+  let m = sub.match(/^= (−?)([^/]+)\/(\d+)$/);
+  if (m) return renderRow(['= ' + m[1], { t: 'frac', a: tokenize(m[2]), b: tokenize(m[3]) }], [], false);
+  m = sub.match(/^= (−?)(\d*)√(\d+)$/);
+  if (m) return renderRow(['= ' + m[1] + m[2], { t: 'sqrt', a: tokenize(m[3]) }], [], false);
+  return null;
+}
 function renderHist(){
   histEl.textContent = '';
   if (!hist.length) {
-    histEl.appendChild(el('p', 'empty', '수식을 입력하고 = 를 누르면 결과가 여기에 쌓여요. 위쪽 예시 버튼에서 복소수, 페이저, 단위 변환, 행렬, 기호 미분, 적분을 바로 실행해 볼 수 있어요.'));
+    histEl.appendChild(el('p', 'empty', '수식을 입력하고 = 를 누르면 결과가 여기에 쌓여요. 분수, 루트, 지수는 칸이 있는 키로 넣고, 화살표 키로 칸 사이를 옮겨 다녀요. 위쪽 예시 버튼에서 복소수, 페이저, 단위 변환, 행렬, 기호 미분, 적분을 바로 실행해 볼 수 있어요.'));
     return;
   }
   for (const it of hist) {
     const d = el('div', 'h-item');
-    const be = el('button', 'h-expr', it.e); be.type = 'button';
-    be.addEventListener('click', () => { inp.value = it.e; caret = it.e.length; updatePreview(); });
+    const be = el('button', 'h-expr' + (it.n ? ' nx' : ''), it.n ? null : it.e); be.type = 'button';
+    if (it.n) be.appendChild(renderRow(it.n, [], false));
+    be.addEventListener('click', () => {
+      if (it.n && natMode) { natLoad(clone(it.n)); renderNat(); }
+      else setEntryText(it.e);
+    });
     d.appendChild(be);
     if (it.err) d.appendChild(el('div', 'h-err', it.err));
     else {
       const br = el('button', 'h-res', it.main); br.type = 'button';
-      if (it.raw != null) br.addEventListener('click', () => insert(it.raw));
+      if (it.raw != null) br.addEventListener('click', () => { if (natMode) { natInsert(tokenize(it.raw)); renderNat(); } else insert(it.raw); });
       d.appendChild(br);
-      if (it.sub) d.appendChild(el('div', 'h-sub', it.sub));
+      if (it.sub) {
+        const hn = hintNode(it.sub);
+        if (hn) { const sd = el('div', 'h-sub nx'); sd.appendChild(hn); d.appendChild(sd); }
+        else d.appendChild(el('div', 'h-sub', it.sub));
+      }
     }
     histEl.appendChild(d);
   }
   histEl.scrollTop = histEl.scrollHeight;
 }
 function commit(){
-  const src = inp.value.trim(); if (!src) return;
+  let src;
+  try { src = entrySource(true); }
+  catch (err) {
+    if (err instanceof EmptySlot) {
+      const hit = findEmpty(root, []); if (hit) cur = hit;
+      renderNat(); clearTimeout(pvTimer);
+      previewEl.textContent = err.message; previewEl.classList.add('bad');
+      return;
+    }
+    throw err;
+  }
+  if (!src) return;
   let item;
   try {
     const { node, val } = run(src, scope);
@@ -459,17 +728,20 @@ function commit(){
     const v = (val && val.isResultSet) ? val.entries[val.entries.length - 1] : val;
     if (v !== undefined && typeof v !== 'function') scope.ans = v;
   } catch (err) { item = { e: src, err: cleanErr(err) }; }
+  if (natMode) item.n = clone(root);
   hist.push(item); if (hist.length > 80) hist.shift();
   store.set('hist', hist);
-  inp.value = ''; caret = 0; previewEl.textContent = '';
   graphStale = bodeStale = true;
+  clearEntry();
   renderHist();
 }
 let pvTimer = 0;
 function updatePreview(){
   clearTimeout(pvTimer);
+  previewEl.classList.remove('bad');
   pvTimer = setTimeout(() => {
-    const src = inp.value.trim();
+    let src;
+    try { src = entrySource(true); } catch (e) { previewEl.textContent = ''; return; }
     if (!src) { previewEl.textContent = ''; return; }
     try { const { node, val } = run(src, Object.assign({}, scope)); const f = describe(node, val); previewEl.textContent = (f.raw == null) ? '' : '= ' + f.main + (f.sub && f.sub !== '기호 결과' ? '   ' + f.sub : ''); }
     catch (e) { previewEl.textContent = ''; }
@@ -500,11 +772,41 @@ function backspace(){
   try { inp.setSelectionRange(caret, caret); } catch (err) {}
   updatePreview();
 }
+function textMove(d){
+  caret = Math.max(0, Math.min(inp.value.length, caret + d));
+  try { inp.setSelectionRange(caret, caret); } catch (err) {}
+}
+function natKey(spec){
+  const fresh = !root.length && scope.ans !== undefined;
+  if (typeof spec === 'string') {
+    if (spec === ')' && cur.row[cur.i] === ')') { cur.i++; renderNat(); return; }
+    if (fresh && /^[\/*+^!]/.test(spec)) natInsert(['ans']);
+    const p = spec.indexOf('|');
+    const before = tokenize(p >= 0 ? spec.slice(0, p) : spec), after = p >= 0 ? tokenize(spec.slice(p + 1)) : [];
+    natInsert(before); natInsert(after); cur.i -= after.length;
+  } else {
+    if (fresh && spec.post) natInsert(['ans']);
+    if (spec.seq) natInsert(spec.seq);
+    natNode(spec.node, spec);
+  }
+  renderNat();
+}
+const T = {
+  frac: { node: 'frac' }, sqrt: { node: 'sqrt' }, root: { node: 'root' }, cbrt: { node: 'root', pre: { n: ['3'] }, slot: 'a' },
+  sq: { node: 'pow', pre: { a: ['2'] }, after: true, post: true }, pow: { node: 'pow', post: true },
+  inv: { node: 'pow', pre: { a: ['-', '1'] }, after: true, post: true }, logb: { node: 'logb' }, abs: { node: 'abs' },
+  exp: { node: 'pow', seq: ['e'] }, e10: { node: 'pow', seq: ['*', '1', '0'], post: true }
+};
+const NAV = { '#left': [natLeft, -1], '#right': [natRight, 1], '#up': [() => natVert(-1), 0], '#down': [() => natVert(1), 0] };
+const BOX = '<i class="kb"></i>', SBOX = c => `<i class="kbs ${c}"></i>`;
 const FN_ROWS = [
   [['sin','sin(|)'],['cos','cos(|)'],['tan','tan(|)'],['sin⁻¹','asin(|)'],['cos⁻¹','acos(|)'],['tan⁻¹','atan(|)']],
-  [['sinh','sinh(|)'],['cosh','cosh(|)'],['tanh','tanh(|)'],['ln','log(|)'],['log','log10(|)'],['eˣ','exp(|)']],
-  [['x²','^2'],['x³','^3'],['xʸ','^'],['√','sqrt(|)'],['³√','cbrt(|)'],['1/x','1/(|)']],
-  [['abs','abs(|)'],['n!','!'],['nCr','combinations(|, )'],['nPr','permutations(|, )'],['mod',' mod '],['rand','random()']],
+  [['sinh','sinh(|)'],['cosh','cosh(|)'],['tanh','tanh(|)'],['ln','log(|)'],['log','log10(|)'],['eˣ','exp(|)','fn',T.exp,'e' + SBOX('up')]],
+  [['분수','(|)/()','fn',T.frac,'<span class="kfr"><i></i><b></b><i></i></span>'],['√','sqrt(|)','fn',T.sqrt,'√' + BOX],
+   ['ⁿ√','nthRoot(|, )','fn',T.root,SBOX('pre') + '√' + BOX],['x²','^2','fn',T.sq],['xʸ','^','fn',T.pow,'x' + SBOX('up')],
+   ['log밑','log(|, )','fn',T.logb,'log' + SBOX('dn')]],
+  [['◀','#left','fn'],['▲','#up','fn'],['▼','#down','fn'],['▶','#right','fn'],['x⁻¹','^(-1)','fn',T.inv],['abs','abs(|)','fn',T.abs,'|' + BOX + '|']],
+  [['³√','cbrt(|)','fn',T.cbrt,'³√' + BOX],['n!','!'],['nCr','combinations(|, )'],['nPr','permutations(|, )'],['mod',' mod '],['rand','random()']],
   [['d/dx','derivative("|", "x")','an'],['∫','integrate("|", 0, 1)','an'],['근찾기','nsolve("|", 1)','an'],['정리','simplify("|")','an'],['det','det(|)','an'],['inv','inv(|)','an']],
   [['π','pi'],['e','e'],['i','i'],['x','x'],[';','; '],['[ ]','[|]']],
   [['∠','∠','an'],['par','par(|)','an'],['dB','db(|)','an'],['to',' to ','an'],['°',' deg','an'],[',',', ']]
@@ -513,36 +815,50 @@ const NUM_KEYS = [
   ['7','7',''],['8','8',''],['9','9',''],['÷','/','op'],['⌫','#back','op'],['AC','#clear','op'],
   ['4','4',''],['5','5',''],['6','6',''],['×','*','op'],['(','(','fn'],[')',')','fn'],
   ['1','1',''],['2','2',''],['3','3',''],['−','-','op'],['ans','ans','fn'],['=','#eval','eq tall'],
-  ['0','0',''],['.','.',''],['×10ˣ','*10^','fn'],['+','+','op'],['≔',' = ','fn']
+  ['0','0',''],['.','.',''],['×10ˣ','*10^','fn',T.e10,'×10' + SBOX('up')],['+','+','op'],['≔',' = ','fn']
 ];
 const KEY_LABEL = { '⌫':'한 글자 지우기','AC':'입력 전체 지우기','÷':'나누기','×':'곱하기','−':'빼기','+':'더하기','=':'계산','≔':'대입 기호 =',
-  'xʸ':'거듭제곱','√':'제곱근','³√':'세제곱근','1/x':'역수','eˣ':'e의 거듭제곱','×10ˣ':'10의 거듭제곱 곱하기','sin⁻¹':'아크사인','cos⁻¹':'아크코사인','tan⁻¹':'아크탄젠트',
-  'x²':'제곱','x³':'세제곱','d/dx':'기호 미분','∫':'정적분','°':'도 단위','∠':'페이저 각도','[ ]':'대괄호' };
+  'xʸ':'거듭제곱','√':'제곱근','³√':'세제곱근','ⁿ√':'n제곱근','x⁻¹':'역수','eˣ':'e의 거듭제곱','×10ˣ':'10의 거듭제곱 곱하기','sin⁻¹':'아크사인','cos⁻¹':'아크코사인','tan⁻¹':'아크탄젠트',
+  'x²':'제곱','분수':'분수','log밑':'밑이 있는 로그','abs':'절댓값','◀':'커서 왼쪽','▶':'커서 오른쪽','▲':'커서 위 (분자로)','▼':'커서 아래 (분모로)',
+  'd/dx':'기호 미분','∫':'정적분','°':'도 단위','∠':'페이저 각도','[ ]':'대괄호' };
 const kp = $('#keypad');
-function addKey(label, ins, cls){
-  const b = el('button', 'key ' + (cls == null ? 'fn' : cls), label); b.type = 'button';
-  if (KEY_LABEL[label]) b.setAttribute('aria-label', KEY_LABEL[label]);
+function addKey(label, ins, cls, nat, html){
+  const b = el('button', 'key ' + (cls == null ? 'fn' : cls), html ? null : label); b.type = 'button';
+  if (html) b.innerHTML = html;
+  if (KEY_LABEL[label] || html) b.setAttribute('aria-label', KEY_LABEL[label] || label);
   b.addEventListener('click', () => {
-    if (ins === '#back') return backspace();
-    if (ins === '#clear') { inp.value = ''; caret = 0; previewEl.textContent = ''; return; }
     if (ins === '#eval') return commit();
+    if (ins === '#clear') return clearEntry();
+    if (natMode) {
+      if (ins === '#back') { natBack(); return renderNat(); }
+      if (NAV[ins]) { NAV[ins][0](); return renderNat(); }
+      return natKey(nat || ins);
+    }
+    if (ins === '#back') return backspace();
+    if (NAV[ins]) return textMove(NAV[ins][1]);
     if (inp.value === '' && /^[\/*+^]/.test(ins) && scope.ans !== undefined) return insert('ans' + ins);
     insert(ins);
   });
   kp.appendChild(b);
 }
-FN_ROWS.forEach(row => row.forEach(([l, i, c]) => addKey(l, i, c)));
-NUM_KEYS.forEach(([l, i, c]) => addKey(l, i, c));
+FN_ROWS.forEach(row => row.forEach(([l, i, c, n, h]) => addKey(l, i, c, n, h)));
+NUM_KEYS.forEach(([l, i, c, n, h]) => addKey(l, i, c, n, h));
 
 $('#exBtn').addEventListener('click', openSheet);
 const kbdBtn = $('#kbdBtn');
-kbdBtn.addEventListener('click', () => {
-  const on = inp.inputMode !== 'text';
-  inp.inputMode = on ? 'text' : 'none';
-  kbdBtn.setAttribute('aria-pressed', String(on));
-  kbdBtn.setAttribute('aria-label', on ? '기기 키보드 끄기' : '기기 키보드 켜기');
-  if (on) inp.focus(); else inp.blur();
-});
+function setMode(nat, focus){
+  if (nat !== natMode) {
+    if (nat) natLoad(tokenize(inp.value));
+    else { inp.value = toStr(root, false); caret = inp.value.length; }
+  }
+  natMode = nat; store.set('natural', nat);
+  natEl.hidden = !nat; inp.hidden = nat;
+  kbdBtn.setAttribute('aria-pressed', String(!nat));
+  kbdBtn.setAttribute('aria-label', nat ? '텍스트 입력으로 전환' : '자연 표시 입력으로 전환');
+  if (nat) renderNat(); else { updatePreview(); if (focus) inp.focus(); }
+}
+kbdBtn.addEventListener('click', () => setMode(!natMode, true));
+setMode(natMode, false);
 let clearArm = 0;
 const clearBtn = $('#clearHist');
 clearBtn.addEventListener('click', () => {
@@ -572,7 +888,7 @@ const sheet = $('#sheet'), exList = $('#exList');
 EXAMPLES.forEach(([ex, desc]) => {
   const b = el('button', 'ex'); b.type = 'button';
   b.appendChild(el('code', null, ex)); b.appendChild(el('span', null, desc));
-  b.addEventListener('click', () => { closeSheet(); inp.value = ex; caret = ex.length; commit(); });
+  b.addEventListener('click', () => { closeSheet(); setEntryText(ex); commit(); });
   exList.appendChild(b);
 });
 function openSheet(){ sheet.classList.add('open'); $('#sheetClose').focus(); }
